@@ -27,5 +27,6 @@
     coreutils
     git
     mkpasswd
+    vim
   ];
 }
