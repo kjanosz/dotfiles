@@ -6,6 +6,7 @@ in
 {
   imports = [
     ./common.nix
+    ./modules/emacs.nix
   ];
 
   boot.initrd.availableKernelModules = [ "ehci_pci" "ahci" "firewire_ohci" "usbhid" "usb_storage" "sd_mod" "sr_mod" "sdhci_pci" ];
