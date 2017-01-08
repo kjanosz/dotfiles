@@ -2,6 +2,9 @@
 
 let
   emacs = pkgs.emacsWithPackages (epkgs: with epkgs; [
+    # package management
+    use-package
+  
     # appearance
     base16-theme
     rainbow-delimiters
