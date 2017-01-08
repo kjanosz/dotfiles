@@ -106,18 +106,27 @@ in
       [spotify]
       enabled = true
       username = kjanosz
-      password = ${secrets.spotify}
+      password = ${secrets.spotifyPassword}
       bitrate = 320
     '';
   };
 
-  # Define a user account.
-  users.extraUsers.kjanosz = {
+  users.extraUsers.kj = {
+    hashedPassword = "${secrets.kjPassword}";
+    uid = 1000;
     isNormalUser = true;
     home = "/home/kjanosz";
+    description = "Krzysztof Janosz";
     extraGroups = [ "wheel" "networkmanager" ]; 
-    shell = pkgs.zsh;
-    uid = 1000;
+  };
+
+  users.extraUsers.kjw = {
+    hashedPassword = "${secrets.kjwPassword}";
+    uid = 10000;
+    isNormalUser = true;
+    home = "/home/kjanosz_work";
+    description = "Krzysztof Janosz (Work)";
+    extraGroups = [ "networkmanager" ];
   };
 
   nixpkgs.config.allowUnfree = true;
