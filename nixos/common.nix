@@ -21,9 +21,12 @@
 
   users.defaultUserShell = pkgs.zsh;
 
+  users.mutableUsers = false;
+
   environment.systemPackages = with pkgs; [
     coreutils
     emacs
     git
+    mkpasswd
   ];
 }
