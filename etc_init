@@ -6,7 +6,10 @@ if [ -z "$1" ]; then
 fi
 
 BRANCH=$1
+CHECKOUT_FLAGS="${@:2}"
 DIR=`dirname "$(readlink -f "$0")"`
+GROUP=`id -gn`
+USER=`whoami`
 source $DIR/etc.cfg
 
 git ls-remote --exit-code --heads $etc_repo $BRANCH > /dev/null 2>&1
@@ -16,17 +19,18 @@ if [ $? -ne 0 ]; then
 fi
 
 while true; do
-  read -p "Do you wish to update /etc using $etc_repo#$BRANCH? [Y/n] " yn
+  read -p "Do you wish to initialize /etc using $etc_repo#$BRANCH? [Y/n] " yn
   case $yn in
     [Yy]*)
       git clone --bare $etc_repo $DIR/.etc > /dev/null 2>&1
       $DIR/etc_config config --local status.showUntrackedFiles no
-      $DIR/etc_config checkout -f $BRANCH > /dev/null 2>&1
-      echo "Update performed"
+      sudo $DIR/etc_config checkout $CHECKOUT_FLAGS $BRANCH > /dev/null 2>&1
+      chown -R $USER:$GROUP $DIR/.etc > /dev/null 2>&1
+      echo "Initialization performed"
       break
       ;;
     [Nn]*)
-      echo "Update cancelled"
+      echo "Initialization cancelled"
       exit
       ;;
     esac

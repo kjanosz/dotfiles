@@ -1,9 +1,6 @@
 #!/usr/bin/env sh
 
 DIR=`dirname "$(readlink -f "$0")"`
-GIT="sudo git --git-dir=$DIR/.etc --work-tree=/etc"
-GROUP=`id -gn`
-USER=`whoami`
+GIT="git --git-dir=$DIR/.etc --work-tree=/etc"
 
 $GIT "$@"
-sudo chown -R $USER:$GROUP $DIR/.etc > /dev/null 2>&1
