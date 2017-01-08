@@ -5,9 +5,11 @@
     <nixpkgs/nixos/modules/installer/scan/not-detected.nix>
   ];
 
-  boot.loader.grub.enable = true;
-  boot.loader.grub.version = 2;
-
+  boot.loader.grub = {
+    enable = true;
+    version = 2;
+  };
+    
   i18n = {
     consoleFont = "Lat2-Terminus16";
     consoleKeyMap = "pl";
@@ -19,10 +21,15 @@
     enableCompletion = true;
   };
 
-  users.defaultUserShell = pkgs.zsh;
+  services.logind.extraConfig = ''
+    KillUserProcesses=yes
+  '';
 
-  users.mutableUsers = false;
-
+  users = {
+    defaultUserShell = pkgs.zsh;
+    mutableUsers = false;
+  };
+    
   environment.systemPackages = with pkgs; [
     coreutils
     git
