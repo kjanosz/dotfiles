@@ -8,8 +8,6 @@ fi
 BRANCH=$1
 CHECKOUT_FLAGS="${@:2}"
 DIR=`dirname "$(readlink -f "$0")"`
-GROUP=`id -gn`
-USER=`whoami`
 source $DIR/etc.cfg
 
 git ls-remote --exit-code --heads $etc_repo $BRANCH > /dev/null 2>&1
@@ -25,7 +23,6 @@ while true; do
       git clone --bare $etc_repo $DIR/.etc > /dev/null 2>&1
       $DIR/etc_config config --local status.showUntrackedFiles no
       sudo $DIR/etc_config checkout $CHECKOUT_FLAGS $BRANCH > /dev/null 2>&1
-      chown -R $USER:$GROUP $DIR/.etc > /dev/null 2>&1
       echo "Initialization performed"
       break
       ;;

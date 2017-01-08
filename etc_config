@@ -2,5 +2,8 @@
 
 DIR=`dirname "$(readlink -f "$0")"`
 GIT="git --git-dir=$DIR/.etc --work-tree=/etc"
+USER=`logname`
+GROUP=`id -gn $USER`
 
 $GIT "$@"
+chown -R $USER:$GROUP $DIR/.etc > /dev/null 2>&1
