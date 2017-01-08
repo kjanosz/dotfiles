@@ -25,8 +25,8 @@
 
   environment.systemPackages = with pkgs; [
     coreutils
-    emacs
     git
     mkpasswd
+    vim
   ];
 }
