@@ -1,0 +1,33 @@
+#!/usr/bin/env sh
+
+if [ -z "$1" ]; then
+    echo 'No branch provided'
+    exit 1
+fi
+
+BRANCH=$1
+DIR=`dirname "$(readlink -f "$0")"`
+source $DIR/etc.cfg
+
+git ls-remote --exit-code --heads $etc_repo $BRANCH > /dev/null 2>&1
+if [ $? -ne 0 ]; then
+  echo 'Invalid branch provided'
+  exit 1
+fi
+
+while true; do
+  read -p "Do you wish to update /etc using $etc_repo#$BRANCH? [Y/n] " yn
+  case $yn in
+    [Yy]*)
+      git clone --bare $etc_repo $DIR/.etc > /dev/null 2>&1
+      $DIR/etc_config config --local status.showUntrackedFiles no
+      $DIR/etc_config checkout -f $BRANCH > /dev/null 2>&1
+      echo "Update performed"
+      break
+      ;;
+    [Nn]*)
+      echo "Update cancelled"
+      exit
+      ;;
+    esac
+done
