@@ -6,7 +6,6 @@ in
 {
   imports = [
     ./common.nix
-    ./modules/emacs.nix
   ];
 
   boot.initrd.availableKernelModules = [ "ehci_pci" "ahci" "firewire_ohci" "usbhid" "usb_storage" "sd_mod" "sr_mod" "sdhci_pci" ];
@@ -62,18 +61,49 @@ in
 
   time.timeZone = "Europe/Warsaw";
 
+  nixpkgs.config.packageOverrides = pkgs: {
+    emacs = pkgs.callPackage ./pkgs/emacs { };
+  };
+  
   environment.systemPackages = with pkgs; [
     chromium
+    emacs
     firefox
     gnome-mpv
     gnupg
-    idea.idea-community
     keepassx2
     pass
     terminator
+    texlive.combined.scheme-small
     thunderbird
+
+    # dev
+    emacs
+    idea.idea-community
+    ack
+    ag
+    go
+    gotools
+    ghc
+    stack
+    haskellPackages.idris
+    cargo
+    rustc
+    rustfmt
+    sbt
+    scala
+    scalafmt
+    python
+    racket
   ];
 
+  services.emacs = {
+    defaultEditor = true;
+    enable = false;
+    install = true;
+    package = pkgs.emacs;
+  };
+  
   services.pcscd.enable = true;
 
   services.xserver = {
