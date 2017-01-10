@@ -6,6 +6,7 @@ in
 {
   imports = [
     ./common.nix
+    ./modules/foxcommerce.nix
   ];
 
   boot.initrd.availableKernelModules = [ "ehci_pci" "ahci" "firewire_ohci" "usbhid" "usb_storage" "sd_mod" "sr_mod" "sdhci_pci" ];
@@ -67,12 +68,13 @@ in
   
   environment.systemPackages = with pkgs; [
     chromium
-    emacs
     firefox
     gnome-mpv
     gnupg
     keepassx2
+    oh-my-zsh
     pass
+    pwgen
     terminator
     texlive.combined.scheme-small
     thunderbird
@@ -90,12 +92,15 @@ in
     cargo
     rustc
     rustfmt
+    openjdk
     sbt
     scala
     scalafmt
     python
     racket
   ];
+
+  programs.ssh.startAgent = false;
 
   services.emacs = {
     defaultEditor = true;
