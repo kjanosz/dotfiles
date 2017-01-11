@@ -33,7 +33,12 @@
   environment.systemPackages = with pkgs; [
     coreutils
     git
+    htop
+    lsof
+    ltrace
     mkpasswd
+    psmisc
+    strace
     vim
   ];
 }
