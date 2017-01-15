@@ -2,7 +2,7 @@
 
 function pre_lock_screen() {
   # save kbd options, set defaults without any options, and disable vt switching
-  KBD_OPTS=`${pkgs.xorg.setxkbmap}/bin/setxkbmap -query | awk -F" " '/options/ {print $2}'`
+  KBD_OPTS=`setxkbmap -query | awk -F" " '/options/ {print $2}'`
   setxkbmap -option ""
   setxkbmap -option srvrkeys:none
 }
