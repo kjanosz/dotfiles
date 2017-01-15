@@ -1,7 +1,14 @@
 { pkgs, ... }:
 
 let
-  base = (pkgs.emacsPackagesNgGen pkgs.emacs25).override (super: self: {
+  baseNoGTK = pkgs.emacs25.override {
+    # Use ‘lucid’ toolkit because of following bug in GTK: https://bugzilla.gnome.org/show_bug.cgi?id=85715
+    withX = true;
+    withGTK2 = false;
+    withGTK3 = false;
+  };
+  
+  base = (pkgs.emacsPackagesNgGen baseNoGTK).override (super: self: {
     inherit (self.melpaPackages)
     # Use these from MELPA Unstable:
     intero ranger;

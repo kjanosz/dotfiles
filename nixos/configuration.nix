@@ -48,6 +48,7 @@ in
 
   hardware.pulseaudio = {
     enable = true;
+    package = pkgs.pulseaudioFull;
     support32Bit = true;
     extraConfig = ''
       load-module module-native-protocol-tcp auth-ip-acl=127.0.0.1
@@ -57,27 +58,53 @@ in
   nix.maxJobs = 4;
   nix.buildCores = 4;
 
-  networking.hostName = "nixos";
-  networking.networkmanager.enable = true;
+  networking = {
+    hostName = "nixos";
+    nameservers = [ "130.255.73.90" "104.238.186.189" "185.121.177.177" "185.121.177.53" "50.116.40.226"  ]; # OpenNIC DNS servers with DNSCrypt enabled
+    networkmanager.enable = true;
+  };
 
   time.timeZone = "Europe/Warsaw";
 
-  nixpkgs.config.packageOverrides = pkgs: {
-    emacs = pkgs.callPackage ./pkgs/emacs { };
+  nixpkgs.config.allowUnfree = true;
+  nixpkgs.config.packageOverrides = pkgs: with pkgs; {
+    emacs = callPackage ./pkgs/emacs { };
+    desktop_utils = callPackage ./pkgs/desktop_utils { };
   };
-  
+
+  environment.pathsToLink = [ "/share/oh-my-zsh" ];
   environment.systemPackages = with pkgs; [
+    acpi
+    arc-gtk-theme
+    bindfs
     chromium
+    desktop_utils.i3-lock-screen
+    desktop_utils.i3-merge-configs
+    dunst
+    exiv2
     firefox
-    gnome-mpv
+    feh
     gnupg
+    gnupg1compat
+    i3lock
+    i3status
+    imagemagick
     keepassx2
+    libreoffice
+    lightdm
+    mpv
+    ncmpcpp
+    networkmanagerapplet
     oh-my-zsh
     pass
-    pwgen
+    pavucontrol
+    rofi
     terminator
     texlive.combined.scheme-small
     thunderbird
+    xorg.xev
+    xss-lock
+    zathura
 
     # dev
     emacs
@@ -100,6 +127,18 @@ in
     racket
   ];
 
+  fonts = {
+    enableGhostscriptFonts = true;
+    fonts = with pkgs; [
+      anonymousPro
+      hack-font
+      inconsolata
+      terminus_font
+      unifont
+      unifont_upper
+    ];
+  };
+
   programs.ssh.startAgent = false;
 
   services.emacs = {
@@ -114,27 +153,22 @@ in
   services.xserver = {
     enable = true;
     layout = "pl";
+
+    synaptics = {
+      enable = true;
+      twoFingerScroll = true;
+      tapButtons = true;
+      fingersMap = [1 3 2];
+    };
     
-    desktopManager = {
-      gnome3.enable = true;
-      default = "gnome3";
-    };
-
-    displayManager = {
-      gdm.enable = true;
-    };
+    displayManager.lightdm.enable = true;
+    desktopManager.xterm.enable = false;
+    windowManager.i3.enable = true;
   };
-
-  environment.gnome3.excludePackages = [
-    pkgs.epiphany
-    pkgs.gnome3.evolution
-    pkgs.gnome3.gnome-calendar
-    pkgs.gnome3.totem
-  ];
 
   services.mopidy = {
     enable = true;
-    extensionPackages = [ pkgs.mopidy-mopify pkgs.mopidy-spotify ];
+    extensionPackages = [ pkgs.mopidy-mopify pkgs.mopidy-spotify pkgs.mopidy-spotify-tunigo ];
     configuration = ''
       [audio]
       output = pulsesink server=127.0.0.1
@@ -147,13 +181,30 @@ in
     '';
   };
 
+  systemd.services.gnupgshare = {
+    description = "Share .gpg directory beetwen normal and work user";
+    wantedBy = [ "user-10000.slice" ];
+    partOf = [ "user-10000.slice" ];
+    path = [ pkgs.bindfs pkgs.utillinux ];
+    preStart = "mkdir -p ${config.users.users.kjw.home}/.gnupg";
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = "yes";
+      ExecStart = ''
+        ${pkgs.bindfs}/bin/bindfs -u kjw -g users -M kjw -p 0600,u+D \
+          ${config.users.users.kj.home}/.gnupg ${config.users.users.kjw.home}/.gnupg
+      '';
+      ExecStop = "${pkgs.utillinux}/bin/umount ${config.users.users.kjw.home}/.gnupg";
+    };
+  };
+
   users.extraUsers.kj = {
     hashedPassword = "${secrets.kjPassword}";
     uid = 1000;
     isNormalUser = true;
     home = "/home/kjanosz";
     description = "Krzysztof Janosz";
-    extraGroups = [ "wheel" "networkmanager" ]; 
+    extraGroups = [ "docker" "networkmanager" "vboxusers" "wheel" ]; 
   };
 
   users.extraUsers.kjw = {
@@ -162,10 +213,11 @@ in
     isNormalUser = true;
     home = "/home/kjanosz_work";
     description = "Krzysztof Janosz (Work)";
-    extraGroups = [ "networkmanager" ];
+    extraGroups = [ "docker" "networkmanager" "vboxusers" ];
   };
-
-  nixpkgs.config.allowUnfree = true;
-
+  
+  virtualisation.docker.enable = true;
+  virtualisation.virtualbox.host.enable = true;
+  
   system.stateVersion = "16.09";
 }
