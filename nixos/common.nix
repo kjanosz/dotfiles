@@ -31,13 +31,21 @@
   };
     
   environment.systemPackages = with pkgs; [
+    calc
+    cloc
     coreutils
+    file
+    findutils
     git
     htop
+    jq
     lsof
     ltrace
     mkpasswd
+    nix-repl
     psmisc
+    pwgen
+    ranger
     strace
     vim
   ];
