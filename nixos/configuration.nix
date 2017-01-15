@@ -60,8 +60,11 @@ in
 
   networking = {
     hostName = "nixos";
-    nameservers = [ "130.255.73.90" "104.238.186.189" "185.121.177.177" "185.121.177.53" "50.116.40.226"  ]; # OpenNIC DNS servers with DNSCrypt enabled
-    networkmanager.enable = true;
+    nameservers = [ "130.255.73.90" "104.238.186.189" "185.121.177.177" "185.121.177.53" "50.116.40.226" ]; # OpenNIC DNS servers with DNSCrypt enabled
+    networkmanager = {
+      enable = true;
+      insertNameservers = config.networking.nameservers;
+    };
   };
 
   time.timeZone = "Europe/Warsaw";
