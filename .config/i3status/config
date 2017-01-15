@@ -1,0 +1,63 @@
+general {
+  colors = true
+  interval = 1
+  color_good = "#859900"
+  color_degraded = "#b58900"
+  color_bad = "#dc322f"
+}
+
+order += "volume master"
+order += "battery 0"
+order += "cpu_usage"
+order += "load"
+order += "disk /"
+order += "disk /home"
+order += "tztime local"
+
+volume master {
+  format = "♪ %volume"
+  format_muted = "♪ off"
+  device = "pulse"
+  mixer = "Master"
+  mixer_idx = 0
+}
+
+battery 0 {
+  format = "%status %percentage"
+  format_down = "No battery"
+  status_chr = "🔋C"
+  status_bat = "🔋D"
+  status_full = "🔋F"
+  path = "/sys/class/power_supply/BAT%d/uevent"
+  hide_seconds = true
+  last_full_capacity = true
+  integer_battery_capacity = true
+  low_threshold = 5
+}
+
+cpu_usage {
+  format = "cpu: %usage"
+  align = "right"
+  min_width = 32 # sometimes goes up to 100
+}
+
+load {
+  format = "load: %1min %5min %15min"
+}
+
+disk "/" {
+  format = "/ %free"
+  threshold_type = "percentage_free"
+  low_threshold = 10
+}
+
+disk "/home" {
+  format = "/home %free"
+  threshold_type = "percentage_free"
+  low_threshold = 10
+}
+
+tztime local {
+  format = "%d-%m-%Y %H:%M:%S %Z"
+}
+
