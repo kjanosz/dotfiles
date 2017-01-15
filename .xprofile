@@ -1,0 +1,3 @@
+. $HOME/.profile
+
+i3-merge-configs
