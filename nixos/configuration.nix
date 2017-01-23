@@ -6,6 +6,7 @@ in
 {
   imports = [
     ./common.nix
+    ./modules/dev.nix
     ./modules/foxcommerce.nix
   ];
 
@@ -55,8 +56,11 @@ in
     '';
   };
 
-  nix.maxJobs = 4;
-  nix.buildCores = 4;
+  nix = {
+    buildCores = 4;
+    maxJobs = 4;
+    useSandbox = true;
+  };  
 
   networking = {
     hostName = "nixos";
@@ -67,20 +71,57 @@ in
     };
   };
 
+  fonts = {
+    enableGhostscriptFonts = true;
+    fonts = with pkgs; [
+      anonymousPro
+      hack-font
+      inconsolata
+      terminus_font
+      unifont
+      unifont_upper
+    ];
+  };
+
+  i18n.inputMethod = {
+    enabled = "fcitx";
+    fcitx.engines = with pkgs.fcitx-engines; [ m17n table-other ];
+  };
+  
   time.timeZone = "Europe/Warsaw";
 
   nixpkgs.config.allowUnfree = true;
   nixpkgs.config.packageOverrides = pkgs: with pkgs; {
-    emacs = callPackage ./pkgs/emacs { };
+    base16-builder = callPackage ./pkgs/base16-builder { };
+    claws-mail = pkgs.claws-mail.override {
+      enablePgp = true;
+      enableNetworkManager = true;
+      enablePluginFancy = true;
+      enablePluginNotificationDialogs = true;
+      enablePluginNotificationSounds = true;
+      enablePluginRssyl = true;
+      enablePluginSpamReport = true;
+      enablePluginVcalendar = true;
+      enableSpellcheck = true;
+      
+      enableLdap = false;
+      enablePluginArchive = false;
+      enablePluginPdf = false;
+      enablePluginRavatar = false;
+      enablePluginSmime = false;
+      enablePluginSpamassassin = false;
+    };
     desktop_utils = callPackage ./pkgs/desktop_utils { };
+    emacs = callPackage ./pkgs/emacs { };
   };
 
   environment.pathsToLink = [ "/share/oh-my-zsh" ];
   environment.systemPackages = with pkgs; [
     acpi
-    arc-gtk-theme
+    base16-builder
     bindfs
     chromium
+    claws-mail
     desktop_utils.i3-lock-screen
     desktop_utils.i3-merge-configs
     dunst
@@ -101,55 +142,15 @@ in
     oh-my-zsh
     pass
     pavucontrol
+    pulseaudioFull
     rofi
-    terminator
+    termite
     texlive.combined.scheme-small
-    thunderbird
-    xorg.xev
     xss-lock
     zathura
-
-    # dev
-    emacs
-    idea.idea-community
-    ack
-    ag
-    go
-    gotools
-    ghc
-    stack
-    haskellPackages.idris
-    cargo
-    rustc
-    rustfmt
-    openjdk
-    sbt
-    scala
-    scalafmt
-    python
-    racket
   ];
-
-  fonts = {
-    enableGhostscriptFonts = true;
-    fonts = with pkgs; [
-      anonymousPro
-      hack-font
-      inconsolata
-      terminus_font
-      unifont
-      unifont_upper
-    ];
-  };
-
+  
   programs.ssh.startAgent = false;
-
-  services.emacs = {
-    defaultEditor = true;
-    enable = false;
-    install = true;
-    package = pkgs.emacs;
-  };
   
   services.pcscd.enable = true;
 
@@ -218,9 +219,6 @@ in
     description = "Krzysztof Janosz (Work)";
     extraGroups = [ "docker" "networkmanager" "vboxusers" ];
   };
-  
-  virtualisation.docker.enable = true;
-  virtualisation.virtualbox.host.enable = true;
   
   system.stateVersion = "16.09";
 }
