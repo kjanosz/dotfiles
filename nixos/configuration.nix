@@ -130,6 +130,7 @@ in
     feh
     gnupg
     gnupg1compat
+    gtk-engine-murrine
     i3lock
     i3status
     imagemagick
@@ -139,6 +140,9 @@ in
     mpv
     ncmpcpp
     networkmanagerapplet
+    numix-gtk-theme
+    numix-icon-theme
+    numix-icon-theme-circle
     oh-my-zsh
     pass
     pavucontrol
@@ -164,10 +168,22 @@ in
       tapButtons = true;
       fingersMap = [1 3 2];
     };
-    
-    displayManager.lightdm.enable = true;
+
     desktopManager.xterm.enable = false;
-    windowManager.i3.enable = true;
+    displayManager.lightdm.enable = true;
+    windowManager.i3 = {
+      enable = true;
+      extraSessionCommands = ''
+         # Set GTK_PATH so that GTK+ can find the theme engines.
+         export GTK_PATH="${config.system.path}/lib/gtk-2.0:${config.system.path}/lib/gtk-3.0"
+
+         # Set GTK_DATA_PREFIX so that GTK+ can find the Xfce themes.
+         export GTK_DATA_PREFIX=${config.system.path}
+      
+         # SVG loader for pixbuf (needed for GTK svg icon themes)
+         export GDK_PIXBUF_MODULE_FILE=$(echo ${pkgs.librsvg.out}/lib/gdk-pixbuf-2.0/*/loaders.cache)
+      '';
+    };  
   };
 
   services.mopidy = {
