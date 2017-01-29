@@ -13,7 +13,7 @@ in
     influxdb10 = (pkgs.stdenv.lib.overrideDerivation pkgs.influxdb (oldAttrs: {
       patches = [ influxDBIncreasePatch ];
     })).bin // { outputs = [ "bin" ]; };
-  }
+  };
 
   services.influxdb = {
     enable = true;

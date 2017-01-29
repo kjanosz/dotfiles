@@ -1,7 +1,7 @@
 { config, pkgs, ... }:
 
 {
-  import = [
+  imports = [
     ./common.nix
     ./hardware-configuration.nix
     ./monitoring.nix
@@ -36,7 +36,7 @@
     isNormalUser = true;
     uid = 1000;
     extraGroups = [ "wheel" "docker" ];
-    openssh.authorizedKeys.keys = [ "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCsk9lKuN4J3N1x39i20m+HoRetjeQh9BSP9pjhgtZq068Wv8xyrSkrgF6CR97DfWf/8nNZNHAMIOdcR0MYL5RqEpgT0NXUDvMOV6NwAw7g7hSUXueGq9lbAS1DjZkYm6/pkAsTUJ1lp7kEgCLFPVOmpaPMNpyANyTrNyuRmzndqyDIFgT5jLLo3Z0Y1Skwjj6LAQAw0k+FGVHguQkjsEaELjkXCnLx/yv4iVOBecbNbQmoL1Om2JPjTZzFPvRg5ClzD82opPtwCMxDSENs3ycVB7pvvpV4MbTbjdZxRbEO1kTGm5ApCpjKMjl2uocKEcr5v9HxI98fHJIqTy/mh5iauG04lsRPoyGDGMeQap/64DgqRcRs5R9sPqjKPbGdqUYGdGpjUodeTlTGbpVaoLIu6yW2oiejqTxUNdKofgWiW8neixSSDhGOX/ubaWBLHZi9ICymLdmlxMihU/lu6N7SScMKYMkafQTOV7Dr664C4yR3JUCffKQqIZtDxGkAlNot2vMK0oABrUK6y7NWi9662pq/rqwYugEjn7JL5tU8LLtyqBwe++27W94Z5tnausvewe7E+vUzXGK0vUISFsf8fTeZ254qcZ4nso/eAmmJvYPZ6vCzcmgPZ1qYNGlGjqtCBFakocLR3uFHMTHpQY+tyehiZcbm4uzdqHE9wDCEUQ== janosz.krzysztof@gmail.com" ];
+    openssh.authorizedKeys.keys = [  "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQD2ur6Nh/oQUWaqY3PB97r0VjdqJiM+BkOYUFysNbTba8wYzlXjRSzc/4roUFkI7GGW/KYAFCg1HCK319gs1qNs6QrdWTGBCDsvYbzG+XvsKzz4Lk8y786w9VjSDPbyRvlOx6nmtYgh9UqZSUkb1D16da9aCcy87RrSU04LZZeZoPFq4r51A/VwyHzvNRFgbiUVQWhNZ/uEcYPxH55TBtq+/DfKrSSBH76LVUjXOGkGutIAexjbEG9jdHkI15L0EUNwe6cwC4LSKfkK/zDqZ2Fs0aRDW1n6ngholWISUspjyc0SUicSy5RP9V/V8tiarcf+0E1cqbdMp+fT/WglbJJ6+/suBaZGuRKC+rqT4hZSRNQ3jluU/tRk914mdUqUleJWr+wTg8/6L9+y/6Z2kbquMWAfcv00DgIyjULbBlcY3ASWE5BeX+mYVhfl60wv62p+74tP99r3HLJTuiuYuGXq/f0Pxa8NZm0bSIc35eHz2RdNbgyJBDX/Ma1orZ19jQCzQ62s75dAZfyqZRpcdJ60Qa4tkB8xchAU6pQM/Pe/BLTFaTx8W3Ji0eta0PxE0yLmiSZ2hTPf67c1dppV26U9AAo00uG0/xoIboTIWjxKpbHJPtASGUbAF69q8EeZaRrwd2DadJoOIxCCKFRmgeD834XYzJ1uOqc/bwtz8/E2RQ==" ];
   };
 
   services.nginx = {
