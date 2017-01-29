@@ -1,0 +1,6 @@
+[user]
+  name = Krzysztof Janosz
+  email = janosz.krzysztof@gmail.com
+  signingkey = janosz.krzysztof@gmail.com
+[commit]
+  gpgsign = true
