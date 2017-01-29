@@ -21,6 +21,9 @@
   services.openssh = {
     enable = true;
     permitRootLogin = "no";
+    extraConfig = ''
+      StreamLocalBindUnlink yes
+    '';
   };
 
   security.pam = {
