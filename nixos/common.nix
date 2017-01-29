@@ -37,6 +37,8 @@
     file
     findutils
     git
+    gnupg
+    gnupg1compat
     htop
     jq
     lsof
