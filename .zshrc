@@ -17,5 +17,8 @@ HIST_STAMPS="mm/dd/yyyy"
 
 plugins=(docker encode64 git pass vagrant)
 
-. $HOME/.profile
 . $ZSH/oh-my-zsh.sh
+
+if [ -f "$HOME/.profile" ]; then
+  . $HOME/.profile
+fi

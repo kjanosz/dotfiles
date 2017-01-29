@@ -1,3 +1,5 @@
-. $HOME/.profile
+if [ -f "$HOME/.profile" ]; then
+  . $HOME/.profile
+fi
 
 i3-merge-configs
