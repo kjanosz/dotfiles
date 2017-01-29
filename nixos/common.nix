@@ -29,7 +29,8 @@
     defaultUserShell = pkgs.zsh;
     mutableUsers = false;
   };
-    
+
+  environment.pathsToLink = [ "/share/oh-my-zsh" ];
   environment.systemPackages = with pkgs; [
     calc
     cloc
@@ -45,6 +46,7 @@
     ltrace
     mkpasswd
     nix-repl
+    oh-my-zsh
     psmisc
     pwgen
     ranger
