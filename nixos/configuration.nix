@@ -115,7 +115,6 @@ in
     emacs = callPackage ./pkgs/emacs { };
   };
 
-  environment.pathsToLink = [ "/share/oh-my-zsh" ];
   environment.systemPackages = with pkgs; [
     acpi
     base16-builder
@@ -128,13 +127,12 @@ in
     exiv2
     firefox
     feh
-    gnupg
-    gnupg1compat
     gtk-engine-murrine
     i3lock
     i3status
     imagemagick
     keepassx2
+    libnotify
     libreoffice
     lightdm
     mpv
@@ -143,7 +141,6 @@ in
     numix-gtk-theme
     numix-icon-theme
     numix-icon-theme-circle
-    oh-my-zsh
     pass
     pavucontrol
     pulseaudioFull
