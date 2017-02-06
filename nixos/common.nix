@@ -1,8 +1,12 @@
 { config, pkgs, ... }:
 
+let
+  nixpkgs-unstable = import <nixpkgs-unstable> { };
+in
 {
   imports = [
     <nixpkgs/nixos/modules/installer/scan/not-detected.nix>
+    ./modules/channels.nix
   ];
 
   boot.loader.grub = {
@@ -30,6 +34,25 @@
     mutableUsers = false;
   };
 
+  nix = {
+    channels = {
+      "nixpkgs" = {
+        address = "https://nixos.org/channels/nixos-16.09";
+        name = "nixos";
+      };
+
+      "nixpkgs-unstable" = {
+        address = "https://nixos.org/channels/nixos-unstable";
+        name = "nixos-unstable";
+      };
+    };
+    useSandbox = true;
+  };
+
+  nixpkgs.config.packageOverrides = pkgs: with pkgs; {
+    inherit (nixpkgs-unstable) oh-my-zsh;
+  };
+  
   environment.pathsToLink = [ "/share/oh-my-zsh" ];
   environment.systemPackages = with pkgs; [
     calc
@@ -46,6 +69,7 @@
     ltrace
     mkpasswd
     nix-repl
+    nox
     oh-my-zsh
     psmisc
     pwgen
