@@ -22,3 +22,5 @@ plugins=(docker encode64 git pass vagrant)
 if [ -f "$HOME/.profile" ]; then
   . $HOME/.profile
 fi
+
+alias weechat='ssh -t kj@kjanosz.com docker exec -it im dtach -a /tmp/weechat'
