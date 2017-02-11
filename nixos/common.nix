@@ -1,8 +1,5 @@
-{ config, pkgs, ... }:
+{ config, lib, pkgs, pkgs_unstable, ... }:
 
-let
-  nixpkgs-unstable = import <nixpkgs-unstable> { };
-in
 {
   imports = [
     <nixpkgs/nixos/modules/installer/scan/not-detected.nix>
@@ -36,21 +33,23 @@ in
 
   nix = {
     channels = {
-      "nixpkgs" = {
+      "pkgs" = {
         address = "https://nixos.org/channels/nixos-16.09";
         name = "nixos";
+        path = "nixpkgs";
       };
 
-      "nixpkgs-unstable" = {
+      "pkgs_unstable" = {
         address = "https://nixos.org/channels/nixos-unstable";
         name = "nixos-unstable";
+        path = "nixpkgs-unstable";
       };
     };
     useSandbox = true;
   };
 
   nixpkgs.config.packageOverrides = pkgs: with pkgs; {
-    inherit (nixpkgs-unstable) oh-my-zsh;
+    inherit (pkgs_unstable) oh-my-zsh;
   };
   
   environment.pathsToLink = [ "/share/oh-my-zsh" ];
@@ -77,4 +76,6 @@ in
     strace
     vim
   ];
+
+  system.stateVersion = "16.09";
 }

@@ -14,14 +14,32 @@ let
       name = mkOption {
         type = types.str;
       };
-      autoUpdate = mkOption {
-        type = types.bool;
-        default = true;
+      path = mkOption {
+        type = types.str;
       };
     };
   };
 
   basePath = "/nix/var/nix/profiles/per-user/root/channels";
+
+  channelPath = c: builtins.toPath "${basePath}/${c.name}/nixpkgs";
+
+  channelExprs = c: "${c.address}/nixexprs.tar.xz";
+
+  channelPkgs = n: c:
+    let
+      imported = builtins.tryEval (import (channelPath c) {
+        config = config // {
+          allowUnfree = config.nixpkgs.config.allowUnfree;
+        };
+      });
+    in
+      if (imported.success) then imported.value
+      else (import (fetchTarball (channelExprs c)) {
+        config = config // {
+          allowUnfree = config.nixpkgs.config.allowUnfree;
+        };  
+      });
 
   addChannel = n: c: ''
     if [ ! -d "${basePath}/${c.name}" ]; then
@@ -30,7 +48,8 @@ let
     fi
   '';
 
-  refreshChannel = n: c: if c.name != "nixos" then "sudo nix-channel --update ${c.name}" else "";
+  refreshChannel = n: c:
+    if c.name != "nixos" then "sudo nix-channel --update ${c.name}" else "";
 
   addChannelsScript = pkgs.writeScript "nixos-rebuild-all" ''
     #!${pkgs.bash}/bin/bash
@@ -47,12 +66,11 @@ let
     sudo nixos-rebuild "$@"
   '';
   
-  channelNixPath = n: c: [
-    "${n}=${basePath}/${c.name}/nixpkgs" 
-    "${n}=${c.address}/nixexprs.tar.xz"
-  ];
-  
-  channelsNixPath = flatten (mapAttrsToList channelNixPath cfg.channels);
+  channelNixPath = n: c:
+    let
+      path = channelPath c;
+    in
+      if builtins.pathExists path then "${c.path}=${path}" else "${c.path}=${channelExprs c}";
 in
 {
   options = {
@@ -64,11 +82,13 @@ in
   };
 
   config = {
+    _module.args = mapAttrs channelPkgs cfg.channels;
+  
     environment.shellAliases = {
-      nixos-rebuild = "${addChannelsScript}";     
+      nixos-rebuild = "${addChannelsScript}";
     };
   
-    nix.nixPath = channelsNixPath ++ [     
+    nix.nixPath = (mapAttrsToList channelNixPath cfg.channels) ++ [     
       "nixos-config=/etc/nixos/configuration.nix"
       "/nix/var/nix/profiles/per-user/root/channels"
     ];
