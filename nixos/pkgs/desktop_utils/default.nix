@@ -3,7 +3,7 @@
 with lib;
 
 let
-  version = "git-20170115";
+  gitVersion = "git-20170115";
   dotfiles = fetchFromGitHub {
     owner = "kjanosz";
     repo = "dotfiles";
@@ -14,6 +14,7 @@ in
 {
   i3-lock-screen = stdenv.mkDerivation rec {
     name = "i3-lock-screen-${version}";
+    version = gitVersion;
     src = dotfiles;
 
     buildInputs = [ makeWrapper ];
@@ -29,6 +30,7 @@ in
 
   i3-merge-configs = stdenv.mkDerivation rec {
     name = "i3-merge-configs-${version}";
+    version = gitVersion;
     src = dotfiles;
 
     buildInputs = [ makeWrapper ];

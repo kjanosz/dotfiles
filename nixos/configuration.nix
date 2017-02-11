@@ -2,6 +2,12 @@
 
 let
   secrets = import ./secrets.nix { inherit pkgs; };
+
+  nixpkgs-unstable = import <nixpkgs-unstable> {
+    config = config // {
+      allowUnfree = true;
+    };
+  };
 in
 {
   imports = [
@@ -59,7 +65,6 @@ in
   nix = {
     buildCores = 4;
     maxJobs = 4;
-    useSandbox = true;
   };  
 
   networking = {
@@ -92,6 +97,9 @@ in
 
   nixpkgs.config.allowUnfree = true;
   nixpkgs.config.packageOverrides = pkgs: with pkgs; {
+    ammonite2_10 = callPackage ./pkgs/ammonite { scala = "2.10"; };
+    ammonite2_11 = callPackage ./pkgs/ammonite { scala = "2.11"; };
+    ammonite2_12 = callPackage ./pkgs/ammonite { scala = "2.12"; };
     base16-builder = callPackage ./pkgs/base16-builder { };
     claws-mail = pkgs.claws-mail.override {
       enablePgp = true;
@@ -113,6 +121,8 @@ in
     };
     desktop_utils = callPackage ./pkgs/desktop_utils { };
     emacs = callPackage ./pkgs/emacs { };
+
+    inherit (nixpkgs-unstable) i3 mopidy mopidy-mopify mopidy-spotify mopidy-spotify-tunigo;
   };
 
   environment.systemPackages = with pkgs; [

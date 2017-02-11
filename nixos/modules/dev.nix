@@ -9,6 +9,8 @@ let
       exec ${pkgs.emacs}/bin/emacsclient --alternate-editor ${pkgs.emacs}/bin/emacs "$@"
     fi
   '';
+
+  nixpkgs-unstable = import <nixpkgs-unstable> { };
 in
 {
   environment.systemPackages = with pkgs; [
@@ -27,11 +29,15 @@ in
     cargo
     rustc
     rustfmt
+    ammonite2_10
+    ammonite2_11
+    ammonite2_12
     openjdk
     sbt
     scala
     scalafmt
     python
+    nixpkgs-unstable.python27Packages.tensorflow
     racket
     nodePackages.node2nix
   ];
@@ -58,5 +64,6 @@ in
   };
 
   virtualisation.docker.enable = true;
+  virtualisation.rkt.enable = true;
   virtualisation.virtualbox.host.enable = true;
 }  
