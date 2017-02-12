@@ -1,4 +1,4 @@
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, makeWrapper, ... }:
 
 with lib;
 
@@ -42,26 +42,30 @@ let
           if (imported.success) then imported.value
           else (import (fetchTarball (channelExprs c)) args);
     in 
-      if builtins.currentSystem == "i686-linux" then
-        [ (nameValuePair name (packages {})) ]
-      else 
-        [
-          (nameValuePair name (packages {}))
-          (nameValuePair (name + "_i686") (packages { system = "i686-linux"; })) 
-        ];
+      if builtins.currentSystem == "i686-linux" then [ (nameValuePair name (packages {})) ]
+      else [
+        (nameValuePair name (packages {}))
+        (nameValuePair (name + "_i686") (packages { system = "i686-linux"; })) 
+      ];
 
   addChannel = n: c: ''
     if [ ! -d "${basePath}/${c.name}" ]; then
-      sudo nix-channel --add ${c.address} ${c.name}
-      sudo nix-channel --update ${c.name}
+      nix-channel --add ${c.address} ${c.name}
+      nix-channel --update ${c.name}
     fi
   '';
 
   refreshChannel = n: c:
-    if c.name != "nixos" then "sudo nix-channel --update ${c.name}" else "";
+    if c.name != "nixos" then "nix-channel --update ${c.name}" else "";
+  
+  channelNixPath = n: c:
+    let
+      path = channelPath c;
+    in
+      if builtins.pathExists path then "${n}=${path}" else "${n}=${channelExprs c}";
 
-  addChannelsScript = pkgs.writeScript "nixos-rebuild-all" ''
-    #!${pkgs.bash}/bin/bash
+  nixos-rebuild = pkgs.writeScriptBin "nixos-rebuild" ''
+    #!/bin/sh
   
     ${concatStringsSep "\n" (mapAttrsToList addChannel allChannels)}
 
@@ -72,14 +76,8 @@ let
       fi
     done
 
-    sudo nixos-rebuild "$@"
+    ${config.system.build.nixos-rebuild}/bin/nixos-rebuild "$@"
   '';
-  
-  channelNixPath = n: c:
-    let
-      path = channelPath c;
-    in
-      if builtins.pathExists path then "${n}=${path}" else "${n}=${channelExprs c}";
 in
 {
   options = {
@@ -112,14 +110,12 @@ in
 
   config = {
     _module.args = listToAttrs (flatten (mapAttrsToList channelPkgs allChannels));
-    
-    environment.shellAliases = {
-      nixos-rebuild = "${addChannelsScript}";
-    };
   
     nix.nixPath = (mapAttrsToList channelNixPath allChannels) ++ [     
       "nixos-config=/etc/nixos/configuration.nix"
       "/nix/var/nix/profiles/per-user/root/channels"
     ];
+
+    environment.systemPackages = [ nixos-rebuild ];
   };
 }
