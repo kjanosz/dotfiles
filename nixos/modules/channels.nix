@@ -1,18 +1,31 @@
-{ config, lib, pkgs, makeWrapper, ... }:
+{ config, lib, pkgs, ... }:
 
 with lib;
 
 let
-  cfg = config.nix;
+  cfg = config.nix.channels;
 
   basePath = "/nix/var/nix/profiles/per-user/root/channels";
-
-  allChannels = cfg.channels.additional // {
+  
+  allChannels = cfg.additional // {
     "nixpkgs" = {
-      address = cfg.channels.base;
+      address = cfg.base;
       name = "nixos";
     };
   };
+
+  savedChannels = let
+    channelsFile = (builtins.getEnv "HOME") + "/.nix-channels";
+    channels = splitString "\n" (lib.removeSuffix "\n" (builtins.readFile channelsFile));
+    channelAttr = ch:
+      let
+        kv = splitString " " ch;
+      in
+        if builtins.length kv == 2
+        then nameValuePair (builtins.elemAt kv 1) (builtins.elemAt kv 0)
+        else { };
+  in
+    builtins.listToAttrs (filter (ch: ch != {}) (map channelAttr channels));
 
   channelPath = c: builtins.toPath "${basePath}/${c.name}/nixpkgs";
 
@@ -35,7 +48,8 @@ let
         
           imported = builtins.tryEval (import (channelPath c) args);
         in
-          if (imported.success) then imported.value
+          if (imported.success)
+          then imported.value
           else (import (fetchTarball (channelExprs c)) args);
     in 
       if builtins.currentSystem == "i686-linux" then [ (nameValuePair name (packages {})) ]
@@ -43,35 +57,52 @@ let
         (nameValuePair name (packages {}))
         (nameValuePair (name + "_i686") (packages { system = "i686-linux"; })) 
       ];
-
-  addChannel = n: c: ''
-    if [ ! -d "${basePath}/${c.name}" ]; then
-      nix-channel --add ${c.address} ${c.name}
-      nix-channel --update ${c.name}
-    fi
-  '';
-
-  refreshChannel = n: c:
-    if c.name != "nixos" then "nix-channel --update ${c.name}" else "";
-  
+      
   channelNixPath = n: c:
     let
       path = channelPath c;
+      channelExists = savedChannels ? ${c.name} && savedChannels.${c.name} == c.address;
     in
-      if builtins.pathExists path then "${n}=${path}" else "${n}=${channelExprs c}";
+      if builtins.pathExists path && channelExists
+      then "${n}=${path}"
+      else "${n}=${channelExprs c}";
 
   nixos-rebuild = pkgs.writeScriptBin "nixos-rebuild" ''
-    #!/bin/sh
-  
-    ${concatStringsSep "\n" (mapAttrsToList addChannel allChannels)}
+    #!${pkgs.bash}/bin/bash
 
-    for i in "$@" ; do
-      if [[ $i == "--upgrade" ]] ; then
-        ${concatStringsSep "\n" (mapAttrsToList refreshChannel allChannels)}
-        break
+    declare -A currentChannels
+    while read l; do
+      t=($l)
+      if [ "''${#t[@]}" -eq "2" ]; then
+        currentChannels["''${t[0]}"]="''${t[1]}"
       fi
+    done < <(nix-channel --list)
+
+    upgrade=0
+    for arg in "$@"; do
+      shift
+      if [ "$arg" == "--upgrade" ]; then
+        upgrade=1
+      else
+        set -- "$@" "$arg"  
+      fi  
     done
 
+    channels=()
+    ${concatMapStringsSep "\n" (c: ''
+      if [ ! -d "${basePath}/${c.name}" ] ||
+         [ "''${currentChannels["${c.name}"]}" != "${c.address}" ]; then
+        nix-channel --add ${c.address} ${c.name}
+        channels+="${c.name} "
+      elif [ $upgrade -eq 1 ]; then
+        channels+="${c.name} "
+      fi
+    '') (builtins.attrValues allChannels)}
+    
+    if [ ! -z "$channels" ]; then
+      nix-channel --update $channels      
+    fi
+    
     ${config.system.build.nixos-rebuild}/bin/nixos-rebuild "$@"
   '';
 in
@@ -113,7 +144,5 @@ in
     ];
 
     environment.systemPackages = [ nixos-rebuild ];
-
-    system.build.nixos-rebuild = nixos-rebuild;
   };
 }
