@@ -23,7 +23,7 @@ let
       in
         if builtins.length kv == 2
         then nameValuePair (builtins.elemAt kv 1) (builtins.elemAt kv 0)
-        else { };
+        else {};
   in
     builtins.listToAttrs (filter (ch: ch != {}) (map channelAttr channels));
 
@@ -65,8 +65,8 @@ let
     in
       if builtins.pathExists path && channelExists
       then "${n}=${path}"
-      else "${n}=${channelExprs c}";
-
+      else "${n}=${channelExprs c}";    
+      
   nixos-rebuild = pkgs.writeScriptBin "nixos-rebuild" ''
     #!${pkgs.bash}/bin/bash
 
@@ -111,9 +111,10 @@ in
     nix = {
       channels = mkOption {
         type = types.submodule {
-          options = {
+          options = {          
             base = mkOption {
-              type = types.str;
+              type = types.nullOr types.str;
+              default = null;
             };
 
             additional = mkOption {
@@ -135,14 +136,18 @@ in
     };
   };
 
-  config = {
+  config = mkIf (cfg.base != null) {
     _module.args = listToAttrs (flatten (mapAttrsToList channelPkgs allChannels));
-  
+
     nix.nixPath = (mapAttrsToList channelNixPath allChannels) ++ [     
       "nixos-config=/etc/nixos/configuration.nix"
       "/nix/var/nix/profiles/per-user/root/channels"
     ];
 
     environment.systemPackages = [ nixos-rebuild ];
+    
+    systemd.services.nixos-upgrade.script = mkForce ''
+      ${nixos-rebuild}/bin/nixos-rebuild switch --no-build-output --upgrade
+    '';
   };
 }
