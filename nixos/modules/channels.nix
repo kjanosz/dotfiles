@@ -23,17 +23,13 @@ let
       name =
         if n == "nixpkgs" then "pkgs"
         else "pkgs_" + (builtins.replaceStrings ["-"] ["_"] (removePrefix "nixpkgs-" n));
-    
-      channelConfig = config // {
-          allowUnfree = config.nixpkgs.config.allowUnfree;
-      };
       
       packages = { system ? builtins.currentSystem }:
         let
           args = {
             system = system;
             config = config // {
-              allowUnfree = config.nixpkgs.config.allowUnfree;
+              allowUnfree = config.nixpkgs.config.allowUnfree or false;
             };
           };
         
@@ -117,5 +113,7 @@ in
     ];
 
     environment.systemPackages = [ nixos-rebuild ];
+
+    system.build.nixos-rebuild = nixos-rebuild;
   };
 }
