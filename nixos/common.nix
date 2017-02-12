@@ -45,6 +45,7 @@
     useSandbox = true;
   };
 
+  nixpkgs.config.allowUnfree = false;
   nixpkgs.config.packageOverrides = pkgs: with pkgs; {
     inherit (pkgs_unstable) oh-my-zsh;
   };
