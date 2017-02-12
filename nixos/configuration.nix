@@ -46,5 +46,10 @@
     enable = true;
   };
 
+  system.autoUpgrade = {
+    enable = true;
+    dates = "04:00";
+  };
+
   virtualisation.docker.enable = true;
 }
