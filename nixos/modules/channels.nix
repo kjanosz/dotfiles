@@ -5,22 +5,14 @@ with lib;
 let
   cfg = config.nix;
 
-  channelSubmodule = { options, ... }:
-  {
-    options = {
-      address = mkOption {
-        type = types.str;
-      };
-      name = mkOption {
-        type = types.str;
-      };
-      path = mkOption {
-        type = types.str;
-      };
+  basePath = "/nix/var/nix/profiles/per-user/root/channels";
+
+  allChannels = cfg.channels.additional // {
+    "nixpkgs" = {
+      address = cfg.channels.base;
+      name = "nixos";
     };
   };
-
-  basePath = "/nix/var/nix/profiles/per-user/root/channels";
 
   channelPath = c: builtins.toPath "${basePath}/${c.name}/nixpkgs";
 
@@ -28,18 +20,35 @@ let
 
   channelPkgs = n: c:
     let
-      imported = builtins.tryEval (import (channelPath c) {
-        config = config // {
+      name =
+        if n == "nixpkgs" then "pkgs"
+        else "pkgs_" + (builtins.replaceStrings ["-"] ["_"] (removePrefix "nixpkgs-" n));
+    
+      channelConfig = config // {
           allowUnfree = config.nixpkgs.config.allowUnfree;
-        };
-      });
-    in
-      if (imported.success) then imported.value
-      else (import (fetchTarball (channelExprs c)) {
-        config = config // {
-          allowUnfree = config.nixpkgs.config.allowUnfree;
-        };  
-      });
+      };
+      
+      packages = { system ? builtins.currentSystem }:
+        let
+          args = {
+            system = system;
+            config = config // {
+              allowUnfree = config.nixpkgs.config.allowUnfree;
+            };
+          };
+        
+          imported = builtins.tryEval (import (channelPath c) args);
+        in
+          if (imported.success) then imported.value
+          else (import (fetchTarball (channelExprs c)) args);
+    in 
+      if builtins.currentSystem == "i686-linux" then
+        [ (nameValuePair name (packages {})) ]
+      else 
+        [
+          (nameValuePair name (packages {}))
+          (nameValuePair (name + "_i686") (packages { system = "i686-linux"; })) 
+        ];
 
   addChannel = n: c: ''
     if [ ! -d "${basePath}/${c.name}" ]; then
@@ -54,11 +63,11 @@ let
   addChannelsScript = pkgs.writeScript "nixos-rebuild-all" ''
     #!${pkgs.bash}/bin/bash
   
-    ${concatStringsSep "\n" (mapAttrsToList addChannel cfg.channels)}
+    ${concatStringsSep "\n" (mapAttrsToList addChannel allChannels)}
 
     for i in "$@" ; do
       if [[ $i == "--upgrade" ]] ; then
-        ${concatStringsSep "\n" (mapAttrsToList refreshChannel cfg.channels)}
+        ${concatStringsSep "\n" (mapAttrsToList refreshChannel allChannels)}
         break
       fi
     done
@@ -70,25 +79,45 @@ let
     let
       path = channelPath c;
     in
-      if builtins.pathExists path then "${c.path}=${path}" else "${c.path}=${channelExprs c}";
+      if builtins.pathExists path then "${n}=${path}" else "${n}=${channelExprs c}";
 in
 {
   options = {
     nix = {
       channels = mkOption {
-        type = types.attrsOf (types.submodule (channelSubmodule));
+        type = types.submodule {
+          options = {
+            base = mkOption {
+              type = types.str;
+            };
+
+            additional = mkOption {
+              type = types.attrsOf (types.submodule {
+                options = {    
+                  address = mkOption {
+                    type = types.str;
+                  };
+                  name = mkOption {
+                    type = types.str;
+                  };
+                };
+              });
+              default = {};
+            };
+          };
+        };  
       };
     };
   };
 
   config = {
-    _module.args = mapAttrs channelPkgs cfg.channels;
-  
+    _module.args = listToAttrs (flatten (mapAttrsToList channelPkgs allChannels));
+    
     environment.shellAliases = {
       nixos-rebuild = "${addChannelsScript}";
     };
   
-    nix.nixPath = (mapAttrsToList channelNixPath cfg.channels) ++ [     
+    nix.nixPath = (mapAttrsToList channelNixPath allChannels) ++ [     
       "nixos-config=/etc/nixos/configuration.nix"
       "/nix/var/nix/profiles/per-user/root/channels"
     ];

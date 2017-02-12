@@ -33,16 +33,13 @@
 
   nix = {
     channels = {
-      "pkgs" = {
-        address = "https://nixos.org/channels/nixos-16.09";
-        name = "nixos";
-        path = "nixpkgs";
-      };
+      base = "https://nixos.org/channels/nixos-16.09";
 
-      "pkgs_unstable" = {
-        address = "https://nixos.org/channels/nixos-unstable";
-        name = "nixos-unstable";
-        path = "nixpkgs-unstable";
+      additional = {
+        "nixpkgs-unstable" = {
+          address = "https://nixos.org/channels/nixos-unstable";
+          name = "nixos-unstable";
+        };
       };
     };
     useSandbox = true;
