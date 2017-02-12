@@ -46,7 +46,5 @@
     enable = true;
   };
 
-  system.stateVersion = "16.09";
-
   virtualisation.docker.enable = true;
 }
