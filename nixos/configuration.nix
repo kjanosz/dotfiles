@@ -1,7 +1,7 @@
 { config, pkgs, ... }:
 
 let
-  secrets = import ./secrets.nix { inherit pkgs; };
+  secrets = import ./secrets.nix;
 
   nixpkgs-unstable = import <nixpkgs-unstable> {
     config = config // {
@@ -242,6 +242,4 @@ in
     description = "Krzysztof Janosz (Work)";
     extraGroups = [ "docker" "networkmanager" "vboxusers" ];
   };
-  
-  system.stateVersion = "16.09";
 }
