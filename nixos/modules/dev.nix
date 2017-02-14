@@ -47,11 +47,10 @@ in
   };
 
   systemd.user.services.emacs = {
+    wantedBy = [ "default.target" ];
+    after = [ "gnupg.service" ];
+    
     path = [ pkgs.gnupg ];
-    preStart = ''
-      gpgconf --create-socketdir
-      gpg-connect-agent /bye > /dev/null 2>&1
-    '';
     script = ''
       export SSH_AUTH_SOCK=$(gpgconf --list-dirs agent-ssh-socket)
       exec "$SHELL" --login -c "exec ${pkgs.emacs}/bin/emacs --daemon"

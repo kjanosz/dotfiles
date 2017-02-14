@@ -188,7 +188,7 @@ in
          export GTK_DATA_PREFIX=${config.system.path}
       
          # SVG loader for pixbuf (needed for GTK svg icon themes)
-         export GDK_PIXBUF_MODULE_FILE=$(echo ${pkgs.librsvg.out}/lib/gdk-pixbuf-2.0/*/loaders.cache)
+         export GDK_PIXBUF_MODULE_FILE=$(echo ${pkgs.librsvg.out}/lib/gdk-pixbuf-2.0/\\*/loaders.cache)
       '';
     };  
   };
@@ -209,9 +209,9 @@ in
   };
 
   systemd.services.gnupgshare = {
-    description = "Share .gpg directory beetwen normal and work user";
     wantedBy = [ "user-10000.slice" ];
     partOf = [ "user-10000.slice" ];
+    
     path = [ pkgs.bindfs pkgs.utillinux ];
     preStart = "mkdir -p ${config.users.users.kjw.home}/.gnupg";
     serviceConfig = {
@@ -222,6 +222,22 @@ in
           ${config.users.users.kj.home}/.gnupg ${config.users.users.kjw.home}/.gnupg
       '';
       ExecStop = "${pkgs.utillinux}/bin/umount ${config.users.users.kjw.home}/.gnupg";
+    };
+  };
+
+  systemd.user.services.gnupg = {
+    wantedBy = [ "default.target" ];
+    after = [ "dbus.socket" ];
+    
+    path = [ pkgs.gnupg ];
+    script = ''
+      gpgconf --create-socketdir
+      gpg-connect-agent /bye > /dev/null 2>&1
+    '';
+    serviceConfig = {
+      Type = "forking";
+      Restart = "always";
+      KillSignal = "SIGKILL";
     };
   };
 
