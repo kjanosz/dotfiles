@@ -79,6 +79,7 @@ in base.emacsWithPackages (epkgs: with epkgs; [
 
   # text - LaTeX, Markdown, Org mode, Pandoc
   auctex
+  ledger-mode
   markdown-mode
   org
   pandoc-mode

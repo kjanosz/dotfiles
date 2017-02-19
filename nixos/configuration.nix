@@ -138,6 +138,7 @@ in
     firefox
     feh
     gtk-engine-murrine
+    haskellPackages.hledger
     i3lock
     i3status
     imagemagick
@@ -153,7 +154,6 @@ in
     numix-icon-theme-circle
     pass
     pavucontrol
-    pulseaudioFull
     rofi
     termite
     texlive.combined.scheme-small
@@ -188,7 +188,7 @@ in
          export GTK_DATA_PREFIX=${config.system.path}
       
          # SVG loader for pixbuf (needed for GTK svg icon themes)
-         export GDK_PIXBUF_MODULE_FILE=$(echo ${pkgs.librsvg.out}/lib/gdk-pixbuf-2.0/\\*/loaders.cache)
+         export GDK_PIXBUF_MODULE_FILE=$(echo ${pkgs.librsvg.out}/lib/gdk-pixbuf-2.0/*/loaders.cache)
       '';
     };  
   };
@@ -227,12 +227,10 @@ in
 
   systemd.user.services.gnupg = {
     wantedBy = [ "default.target" ];
-    after = [ "dbus.socket" ];
     
     path = [ pkgs.gnupg ];
     script = ''
-      gpgconf --create-socketdir
-      gpg-connect-agent /bye > /dev/null 2>&1
+      gpg-agent --homedir $HOME/.gnupg --use-standard-socket --daemon
     '';
     serviceConfig = {
       Type = "forking";
