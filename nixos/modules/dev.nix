@@ -24,6 +24,7 @@ in
     gotools
     cabal-install
     ghc
+    haskellPackages.structured-haskell-mode
     stack
     haskellPackages.idris
     cargo

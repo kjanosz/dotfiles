@@ -100,7 +100,9 @@ in
     ammonite2_10 = callPackage ./pkgs/ammonite { scala = "2.10"; };
     ammonite2_11 = callPackage ./pkgs/ammonite { scala = "2.11"; };
     ammonite2_12 = callPackage ./pkgs/ammonite { scala = "2.12"; };
+    
     base16-builder = callPackage ./pkgs/base16-builder { };
+
     claws-mail = pkgs.claws-mail.override {
       enablePgp = true;
       enableNetworkManager = true;
@@ -119,8 +121,22 @@ in
       enablePluginSmime = false;
       enablePluginSpamassassin = false;
     };
+
     desktop_utils = callPackage ./pkgs/desktop_utils { };
+
     emacs = callPackage ./pkgs/emacs { };
+
+    hs-monky = lib.overrideDerivation (haskellPackages.ghcWithPackages (hs: [ hs.monky ])) (oldAttrs: {
+      postBuild = oldAttrs.postBuild + ''
+        . ${makeWrapper}/nix-support/setup-hook
+        mv $out/bin $out/libexec
+        mkdir -p $out/bin
+        ln -s $out/libexec/monky $out/bin/
+        wrapProgram $out/libexec/monky \
+          --prefix PATH : "$out/libexec" \
+          --prefix GHC_PACKAGE_PATH : "$out/lib/ghc-${oldAttrs.version}/package.conf.d"
+      '';
+    });
 
     inherit (nixpkgs-unstable) i3 mopidy mopidy-mopify mopidy-spotify mopidy-spotify-tunigo;
   };
@@ -139,6 +155,7 @@ in
     feh
     gtk-engine-murrine
     haskellPackages.hledger
+    hs-monky
     i3lock
     i3status
     imagemagick
