@@ -47,7 +47,7 @@
 
   nixpkgs.config.allowUnfree = false;
   nixpkgs.config.packageOverrides = pkgs: with pkgs; {
-    inherit (pkgs_unstable) oh-my-zsh;
+    inherit (pkgs_unstable) lnav oh-my-zsh;
   };
   
   environment.pathsToLink = [ "/share/oh-my-zsh" ];
@@ -60,8 +60,10 @@
     git
     gnupg
     gnupg1compat
+    gnutar
     htop
     jq
+    lnav
     lsof
     ltrace
     mkpasswd
@@ -72,7 +74,9 @@
     pwgen
     ranger
     strace
+    unzip
     vim
+    zip
   ];
 
   system.stateVersion = "16.09";
