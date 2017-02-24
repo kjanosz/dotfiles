@@ -19,9 +19,8 @@ in
     idea.idea-community
     ack
     ag
-    glide
-    go
-    gotools
+    gcc
+    gnumake
     cabal-install
     ghc
     haskellPackages.structured-haskell-mode
@@ -40,7 +39,6 @@ in
     python
     nixpkgs-unstable.python27Packages.tensorflow
     racket
-    nodePackages.node2nix
   ];
 
   environment.variables = {

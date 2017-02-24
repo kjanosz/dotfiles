@@ -69,6 +69,7 @@ in
 
   networking = {
     hostName = "nixos";
+    extraHosts = "127.0.0.1 ${config.networking.hostName}";
     nameservers = [ "130.255.73.90" "104.238.186.189" "185.121.177.177" "185.121.177.53" "50.116.40.226" ]; # OpenNIC DNS servers with DNSCrypt enabled
     networkmanager = {
       enable = true;
@@ -126,27 +127,21 @@ in
 
     emacs = callPackage ./pkgs/emacs { };
 
-    hs-monky = lib.overrideDerivation (haskellPackages.ghcWithPackages (hs: [ hs.monky ])) (oldAttrs: {
-      postBuild = oldAttrs.postBuild + ''
-        . ${makeWrapper}/nix-support/setup-hook
-        mv $out/bin $out/libexec
-        mkdir -p $out/bin
-        ln -s $out/libexec/monky $out/bin/
-        wrapProgram $out/libexec/monky \
-          --prefix PATH : "$out/libexec" \
-          --prefix GHC_PACKAGE_PATH : "$out/lib/ghc-${oldAttrs.version}/package.conf.d"
-      '';
-    });
-
-    inherit (nixpkgs-unstable) i3 mopidy mopidy-mopify mopidy-spotify mopidy-spotify-tunigo;
+    inherit (nixpkgs-unstable) conky i3;
+    inherit (nixpkgs-unstable) mopidy mopidy-mopify mopidy-spotify mopidy-spotify-tunigo;
   };
 
   environment.systemPackages = with pkgs; [
     acpi
+    aspell
+    aspellDicts.de
+    aspellDicts.en
+    aspellDicts.pl
     base16-builder
     bindfs
     chromium
     claws-mail
+    conky
     desktop_utils.i3-lock-screen
     desktop_utils.i3-merge-configs
     dunst
@@ -155,7 +150,6 @@ in
     feh
     gtk-engine-murrine
     haskellPackages.hledger
-    hs-monky
     i3lock
     i3status
     imagemagick
@@ -171,6 +165,7 @@ in
     numix-icon-theme-circle
     pass
     pavucontrol
+    python27Packages.py3status
     rofi
     termite
     texlive.combined.scheme-small
