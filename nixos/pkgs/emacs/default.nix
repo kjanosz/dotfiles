@@ -11,7 +11,7 @@ let
   base = (pkgs.emacsPackagesNgGen baseNoGTK).override (super: self: {
     inherit (self.melpaPackages)
     # Use these from MELPA Unstable:
-    intero ranger;
+    ensime intero ranger;
   });
 in base.emacsWithPackages (epkgs: with epkgs; [
   # package management
@@ -31,6 +31,10 @@ in base.emacsWithPackages (epkgs: with epkgs; [
   ranger
   helm-ag
   helm-projectile
+
+  # elixir
+  alchemist
+  elixir-mode
   
   # go
   go-mode

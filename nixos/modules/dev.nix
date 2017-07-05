@@ -1,4 +1,4 @@
-{ config, lib, utils, pkgs, ... }:
+{ config, lib, utils, pkgs, pkgs_unstable, ... }:
 
 let
   editorScript = pkgs.writeScriptBin "emacseditor" ''
@@ -9,18 +9,17 @@ let
       exec ${pkgs.emacs}/bin/emacsclient --alternate-editor ${pkgs.emacs}/bin/emacs "$@"
     fi
   '';
-
-  nixpkgs-unstable = import <nixpkgs-unstable> { };
 in
 {
   environment.systemPackages = with pkgs; [
     editorScript
     emacs
-    idea.idea-community
+    pkgs_unstable.idea.idea-community
     ack
     ag
     gcc
     gnumake
+    elixir
     cabal-install
     ghc
     haskellPackages.structured-haskell-mode
@@ -29,15 +28,18 @@ in
     cargo
     rustc
     rustfmt
+    rustracer
     ammonite2_10
     ammonite2_11
     ammonite2_12
+    clojure
     openjdk
     sbt
     scala
     scalafmt
+    visualvm
     python
-    nixpkgs-unstable.python27Packages.tensorflow
+    pkgs_unstable.python27Packages.tensorflow
     racket
   ];
 

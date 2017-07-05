@@ -1,13 +1,7 @@
-{ config, pkgs, ... }:
+{ config, pkgs, pkgs_unstable, ... }:
 
 let
   secrets = import ./secrets.nix;
-
-  nixpkgs-unstable = import <nixpkgs-unstable> {
-    config = config // {
-      allowUnfree = true;
-    };
-  };
 in
 {
   imports = [
@@ -18,6 +12,7 @@ in
 
   boot.initrd.availableKernelModules = [ "ehci_pci" "ahci" "firewire_ohci" "usbhid" "usb_storage" "sd_mod" "sr_mod" "sdhci_pci" ];
   boot.kernelModules = [ "kvm-intel" "wl" ];
+  boot.blacklistedKernelModules = [ "bcma" ];	
   boot.extraModulePackages = [ config.boot.kernelPackages.broadcom_sta ];
 
   boot.loader.grub.device = "/dev/sda";
@@ -81,6 +76,7 @@ in
     enableGhostscriptFonts = true;
     fonts = with pkgs; [
       anonymousPro
+      font-awesome-ttf
       hack-font
       inconsolata
       terminus_font
@@ -97,6 +93,9 @@ in
   time.timeZone = "Europe/Warsaw";
 
   nixpkgs.config.allowUnfree = true;
+  nixpkgs.config.permittedInsecurePackages = [
+    "webkitgtk-2.4.11"
+  ];
   nixpkgs.config.packageOverrides = pkgs: with pkgs; {
     ammonite2_10 = callPackage ./pkgs/ammonite { scala = "2.10"; };
     ammonite2_11 = callPackage ./pkgs/ammonite { scala = "2.11"; };
@@ -104,31 +103,15 @@ in
     
     base16-builder = callPackage ./pkgs/base16-builder { };
 
-    claws-mail = pkgs.claws-mail.override {
-      enablePgp = true;
-      enableNetworkManager = true;
-      enablePluginFancy = true;
-      enablePluginNotificationDialogs = true;
-      enablePluginNotificationSounds = true;
-      enablePluginRssyl = true;
-      enablePluginSpamReport = true;
-      enablePluginVcalendar = true;
-      enableSpellcheck = true;
-      
-      enableLdap = false;
-      enablePluginArchive = false;
-      enablePluginPdf = false;
-      enablePluginRavatar = false;
-      enablePluginSmime = false;
-      enablePluginSpamassassin = false;
-    };
-
     desktop_utils = callPackage ./pkgs/desktop_utils { };
 
     emacs = callPackage ./pkgs/emacs { };
 
-    inherit (nixpkgs-unstable) conky i3;
-    inherit (nixpkgs-unstable) mopidy mopidy-mopify mopidy-spotify mopidy-spotify-tunigo;
+    calibre = pkgs.calibre.overrideAttrs (oldAttrs: {
+      buildInputs = oldAttrs.buildInputs ++ [ python27Packages.dns ];
+    });
+
+    inherit (pkgs_unstable) conky i3;
   };
 
   environment.systemPackages = with pkgs; [
@@ -139,20 +122,24 @@ in
     aspellDicts.pl
     base16-builder
     bindfs
+    calibre
     chromium
-    claws-mail
     conky
     desktop_utils.i3-lock-screen
     desktop_utils.i3-merge-configs
+    dropbox
     dunst
     exiv2
     firefox
     feh
+    ghostscript
+    gimp-with-plugins
     gtk-engine-murrine
     haskellPackages.hledger
     i3lock
     i3status
     imagemagick
+    inkscape
     keepassx2
     libnotify
     libreoffice
@@ -168,7 +155,9 @@ in
     python27Packages.py3status
     rofi
     termite
-    texlive.combined.scheme-small
+    texlive.combined.scheme-full
+    thunderbird
+    wineFull
     xss-lock
     zathura
   ];
@@ -234,6 +223,23 @@ in
           ${config.users.users.kj.home}/.gnupg ${config.users.users.kjw.home}/.gnupg
       '';
       ExecStop = "${pkgs.utillinux}/bin/umount ${config.users.users.kjw.home}/.gnupg";
+    };
+  };
+
+  systemd.services.projectsshare = {
+    wantedBy = [ "user-10000.slice" ];
+    partOf = [ "user-10000.slice" ];
+
+    path = [ pkgs.bindfs pkgs.utillinux ];
+    preStart = "mkdir -p ${config.users.users.kjw.home}/Projects/Private";
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = "yes";
+      ExecStart = ''
+        ${pkgs.bindfs}/bin/bindfs -u kjw -g users -M kjw -p 0600,u+D \
+          ${config.users.users.kj.home}/Projects ${config.users.users.kjw.home}/Projects/Private
+      '';
+      ExecStop = "${pkgs.utillinux}/bin/umount ${config.users.users.kjw.home}/Projects/Private";
     };
   };
 
