@@ -5,27 +5,16 @@ with lib;
 let
   cfg = config.nix.channels;
 
-  basePath = "/nix/var/nix/profiles/per-user/root/channels";
+  basePath = "/nix/var/nixpkgs";
   
-  allChannels = cfg.additional // {
+  allChannels = (mapAttrs (n: c: c // { name = "nixos-${n}"; }) cfg.additional) // {
     "nixpkgs" = {
       address = cfg.base;
       name = "nixos";
     };
   };
 
-  savedChannels = let
-    channelsFile = (builtins.getEnv "HOME") + "/.nix-channels";
-    channels = splitString "\n" (lib.removeSuffix "\n" (builtins.readFile channelsFile));
-    channelAttr = ch:
-      let
-        kv = splitString " " ch;
-      in
-        if builtins.length kv == 2
-        then nameValuePair (builtins.elemAt kv 1) (builtins.elemAt kv 0)
-        else {};
-  in
-    builtins.listToAttrs (filter (ch: ch != {}) (map channelAttr channels));
+  channelName = c: builtins.replaceStrings ["nixos"] ["nixpkgs"] c.name;
 
   channelPath = c: builtins.toPath "${basePath}/${c.name}/nixpkgs";
 
@@ -35,7 +24,7 @@ let
     let
       name =
         if n == "nixpkgs" then "pkgs"
-        else "pkgs_" + (builtins.replaceStrings ["-"] ["_"] (removePrefix "nixpkgs-" n));
+        else "pkgs_" + (builtins.replaceStrings ["-"] ["_"] n);
       
       packages = { system ? builtins.currentSystem }:
         let
@@ -45,10 +34,12 @@ let
               allowUnfree = config.nixpkgs.config.allowUnfree or false;
             };
           };
+
+          path = channelPath c;
         
-          imported = builtins.tryEval (import (channelPath c) args);
+          imported = builtins.tryEval (import path args);
         in
-          if (imported.success)
+          if ((builtins.pathExists path) && imported.success)
           then imported.value
           else (import (fetchTarball (channelExprs c)) args);
     in 
@@ -60,24 +51,18 @@ let
       
   channelNixPath = n: c:
     let
+      name = channelName c;
       path = channelPath c;
-      channelExists = savedChannels ? ${c.name} && savedChannels.${c.name} == c.address;
     in
-      if builtins.pathExists path && channelExists
-      then "${n}=${path}"
-      else "${n}=${channelExprs c}";    
+      if builtins.pathExists path
+      then "${name}=${path}"
+      else "${name}=${channelExprs c}";    
       
   nixos-rebuild = pkgs.writeScriptBin "nixos-rebuild" ''
     #!${pkgs.bash}/bin/bash
 
-    declare -A currentChannels
-    while read l; do
-      t=($l)
-      if [ "''${#t[@]}" -eq "2" ]; then
-        currentChannels["''${t[0]}"]="''${t[1]}"
-      fi
-    done < <(nix-channel --list)
-
+    mkdir -p ${basePath}
+    
     upgrade=0
     for arg in "$@"; do
       shift
@@ -88,22 +73,25 @@ let
       fi  
     done
 
-    channels=()
+    GLOBIGNORE=()
     ${concatMapStringsSep "\n" (c: ''
       if [ ! -d "${basePath}/${c.name}" ] ||
-         [ "''${currentChannels["${c.name}"]}" != "${c.address}" ]; then
-        nix-channel --add ${c.address} ${c.name}
-        channels+="${c.name} "
-      elif [ $upgrade -eq 1 ]; then
-        channels+="${c.name} "
+         [ $upgrade -eq 1 ]; then
+         rm -rf ${basePath}/${c.name}
+         ln -s ${fetchTarball (channelExprs c)} ${basePath}/${c.name}
       fi
+      GLOBIGNORE=$GLOBIGNORE:${basePath}/${c.name}
     '') (builtins.attrValues allChannels)}
-    
-    if [ ! -z "$channels" ]; then
-      nix-channel --update $channels      
-    fi
-    
+    rm -rf ${basePath}/* #*/
+    unset GLOBIGNORE
+       
     ${config.system.build.nixos-rebuild}/bin/nixos-rebuild "$@"
+  '';
+
+  nix-env = pkgs.writeScriptBin "nix-env" ''
+    #!${pkgs.bash}/bin/bash
+    
+    ${pkgs.nix}/bin/nix-env -f ${basePath} "$@"
   '';
 in
 {
@@ -123,9 +111,6 @@ in
                   address = mkOption {
                     type = types.str;
                   };
-                  name = mkOption {
-                    type = types.str;
-                  };
                 };
               });
               default = {};
@@ -141,10 +126,10 @@ in
 
     nix.nixPath = (mapAttrsToList channelNixPath allChannels) ++ [     
       "nixos-config=/etc/nixos/configuration.nix"
-      "/nix/var/nix/profiles/per-user/root/channels"
+      "${basePath}"
     ];
 
-    environment.systemPackages = [ nixos-rebuild ];
+    environment.systemPackages = [ nixos-rebuild nix-env ];
     
     systemd.services.nixos-upgrade.script = mkForce ''
       ${nixos-rebuild}/bin/nixos-rebuild switch --no-build-output --upgrade
