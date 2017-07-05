@@ -33,21 +33,25 @@
 
   nix = {
     channels = {
-      base = "https://nixos.org/channels/nixos-16.09";
+      base = "https://nixos.org/channels/nixos-17.03";
 
       additional = {
-        "nixpkgs-unstable" = {
+        "unstable" = {
           address = "https://nixos.org/channels/nixos-unstable";
-          name = "nixos-unstable";
         };
       };
+    };
+    gc = {
+      automatic = true;
+      dates = "weekly";
+      options = "--delete-older-than 30d";
     };
     useSandbox = true;
   };
 
   nixpkgs.config.allowUnfree = false;
   nixpkgs.config.packageOverrides = pkgs: with pkgs; {
-    inherit (pkgs_unstable) oh-my-zsh;
+    inherit (pkgs_unstable) lnav oh-my-zsh;
   };
   
   environment.pathsToLink = [ "/share/oh-my-zsh" ];
@@ -60,20 +64,24 @@
     git
     gnupg
     gnupg1compat
+    gnutar
     htop
     jq
+    lnav
     lsof
     ltrace
     mkpasswd
     nix-repl
-    nox
     oh-my-zsh
+    pciutils
     psmisc
     pwgen
     ranger
     strace
+    unzip
     vim
+    zip
   ];
 
-  system.stateVersion = "16.09";
+  system.stateVersion = "17.03";
 }
