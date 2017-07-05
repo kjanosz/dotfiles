@@ -33,14 +33,18 @@
 
   nix = {
     channels = {
-      base = "https://nixos.org/channels/nixos-16.09";
+      base = "https://nixos.org/channels/nixos-17.03";
 
       additional = {
-        "nixpkgs-unstable" = {
+        "unstable" = {
           address = "https://nixos.org/channels/nixos-unstable";
-          name = "nixos-unstable";
         };
       };
+    };
+    gc = {
+      automatic = true;
+      dates = "weekly";
+      options = "--delete-older-than 30d";
     };
     useSandbox = true;
   };
@@ -68,8 +72,8 @@
     ltrace
     mkpasswd
     nix-repl
-    nox
     oh-my-zsh
+    pciutils
     psmisc
     pwgen
     ranger
@@ -79,5 +83,5 @@
     zip
   ];
 
-  system.stateVersion = "16.09";
+  system.stateVersion = "17.03";
 }
