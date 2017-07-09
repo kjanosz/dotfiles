@@ -93,9 +93,6 @@ in
   time.timeZone = "Europe/Warsaw";
 
   nixpkgs.config.allowUnfree = true;
-  nixpkgs.config.permittedInsecurePackages = [
-    "webkitgtk-2.4.11"
-  ];
   nixpkgs.config.packageOverrides = pkgs: with pkgs; {
     ammonite2_10 = callPackage ./pkgs/ammonite { scala = "2.10"; };
     ammonite2_11 = callPackage ./pkgs/ammonite { scala = "2.11"; };
@@ -111,7 +108,7 @@ in
       buildInputs = oldAttrs.buildInputs ++ [ python27Packages.dns ];
     });
 
-    inherit (pkgs_unstable) conky i3;
+    inherit (pkgs_unstable) i3;
   };
 
   environment.systemPackages = with pkgs; [

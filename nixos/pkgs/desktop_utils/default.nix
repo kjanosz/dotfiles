@@ -3,12 +3,12 @@
 with lib;
 
 let
-  gitVersion = "git-20170115";
+  gitVersion = "git-20170709";
   dotfiles = fetchFromGitHub {
     owner = "kjanosz";
     repo = "dotfiles";
-    rev = "146e7be5a38ccd161854318bdaa22d82e5c5ea28";
-    sha256 = "0aslp6s1aqq771wdd8q43idyaysdlknd4nw76ab30jgqf8agj441";
+    rev = "05ad48d8d612249ba251542c758455e51f7d6b49";
+    sha256 = "0vxz4k02a9gnan11s7mjlw3yyyqibb0gp8b8fphjamd2v8h0ljd9";
   };
 in
 {
@@ -20,7 +20,7 @@ in
     buildInputs = [ makeWrapper ];
     installPhase = ''
       mkdir -p $out/bin
-      cp $src/.local/bin/i3-lock-screen $out/bin
+      cp $src/default/bin/.local/bin/i3-lock-screen $out/bin
     '';
     postInstall = with pkgs; ''
       wrapProgram $out/bin/i3-lock-screen --prefix PATH ':' \
@@ -36,7 +36,7 @@ in
     buildInputs = [ makeWrapper ];
     installPhase = ''
       mkdir -p $out/bin
-      cp $src/.local/bin/i3-merge-configs $out/bin
+      cp $src/default/bin/.local/bin/i3-merge-configs $out/bin
     '';
     postInstall = with pkgs; ''
       wrapProgram $out/bin/i3-merge-configs --prefix PATH ':' \
