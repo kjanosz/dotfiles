@@ -1,0 +1,3 @@
+# Set oh-my-zsh path for nixos and disable auto updates there
+DISABLE_AUTO_UPDATE="true"
+export ZSH="/run/current-system/sw/share/oh-my-zsh"

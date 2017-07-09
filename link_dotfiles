@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+
+if [ -z "$1" ]; then
+    echo 'No configuration provided'
+    exit 1
+fi
+
+declare -A ENVS
+ENVS[kjanosz.com]="nixos kjanosz.com"
+ENVS[kj.laptop]="nixos laptop kj.laptop"
+ENVS[kjw.laptop]="nixos laptop kjw.laptop"
+
+BASE=`dirname "$(readlink -f "$0")"`
+CONFIG=$1
+ENV="${2:-''}"
+
+# linkining general config files
+echo "Linking default files..."
+cp -rs --remove-destination "$BASE/default/$CONFIG"/. "$HOME"
+
+# linking (if any) specific config files
+IFS=', ' read -r -a es <<< "${ENVS[$ENV]}"
+for e in "${es[@]}"
+do
+  if [ -d "$BASE/custom/$e/$CONFIG" ]; then
+    echo "Linking $e files..."
+    cp -rs --remove-destination "$BASE/custom/$e/$CONFIG"/. "$HOME"
+  fi
+done
