@@ -14,16 +14,40 @@ BASE=`dirname "$(readlink -f "$0")"`
 CONFIG=$1
 ENV="${2:-''}"
 
+GREEN='\033[0;32m'
+NC='\033[0m' # No Color
+
+link_files() {
+  find "$1" -type f -printf '%P\n' | while IFS= read -rd $'\n' file; do
+    path="$1/$file"
+    dir=`dirname "$path"`
+
+    mkdir -p $dir
+    if [ ${file: -4} == ".gpg" ]; then # treat it as an encrypted file
+      file_dir=`dirname "$file"`
+      file_name=`basename "$file" .gpg`
+      echo "Decrypting $file to $file_dir/$file_name"
+      gpg --no-verbose --quiet --batch --yes --output "$HOME/$file_dir/$file_name" --decrypt "$path"
+    else
+      echo "Linking $file"
+      ln -sf "$path" "$HOME/$file"
+    fi
+  done
+}
+
 # linkining general config files
-echo "Linking default files..."
-cp -rs --remove-destination "$BASE/default/$CONFIG"/. "$HOME"
+echo -e "${GREEN}Linking default files...${NC}"
+link_files "$BASE/default/$CONFIG"
+# cp -rs --remove-destination "$BASE/default/$CONFIG"/. "$HOME"
 
 # linking (if any) specific config files
 IFS=', ' read -r -a es <<< "${ENVS[$ENV]}"
 for e in "${es[@]}"
 do
   if [ -d "$BASE/custom/$e/$CONFIG" ]; then
-    echo "Linking $e files..."
-    cp -rs --remove-destination "$BASE/custom/$e/$CONFIG"/. "$HOME"
+    echo 
+    echo -e "${GREEN}Linking $e files...${NC}"
+    link_files "$BASE/custom/$e/$CONFIG"
+    # cp -rs --remove-destination "$BASE/custom/$e/$CONFIG"/. "$HOME"
   fi
 done
