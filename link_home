@@ -36,14 +36,14 @@ link_files() {
 }
 
 echo -e "${GREEN}Linking default files...${NC}"
-link_files "$BASE/default/$CONFIG"
+link_files "$BASE/home/default/$CONFIG"
 
 IFS=', ' read -r -a es <<< "${ENVS[$ENV]}"
 for e in "${es[@]}"
 do
-  if [ -d "$BASE/custom/$e/$CONFIG" ]; then
+  if [ -d "$BASE/home/$e/$CONFIG" ]; then
     echo 
     echo -e "${GREEN}Linking $e files...${NC}"
-    link_files "$BASE/custom/$e/$CONFIG"
+    link_files "$BASE/home/$e/$CONFIG"
   fi
 done
