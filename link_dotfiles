@@ -26,7 +26,7 @@ link_files() {
     if [ ${file: -4} == ".gpg" ]; then # treat it as an encrypted file
       file_dir=`dirname "$file"`
       file_name=`basename "$file" .gpg`
-      echo "Decrypting $file to $file_dir/$file_name"
+      echo "Decrypting $file"
       gpg --no-verbose --quiet --batch --yes --output "$HOME/$file_dir/$file_name" --decrypt "$path"
     else
       echo "Linking $file"
@@ -35,12 +35,9 @@ link_files() {
   done
 }
 
-# linkining general config files
 echo -e "${GREEN}Linking default files...${NC}"
 link_files "$BASE/default/$CONFIG"
-# cp -rs --remove-destination "$BASE/default/$CONFIG"/. "$HOME"
 
-# linking (if any) specific config files
 IFS=', ' read -r -a es <<< "${ENVS[$ENV]}"
 for e in "${es[@]}"
 do
@@ -48,6 +45,5 @@ do
     echo 
     echo -e "${GREEN}Linking $e files...${NC}"
     link_files "$BASE/custom/$e/$CONFIG"
-    # cp -rs --remove-destination "$BASE/custom/$e/$CONFIG"/. "$HOME"
   fi
 done
