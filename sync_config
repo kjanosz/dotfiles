@@ -1,0 +1,92 @@
+#!/usr/bin/env bash
+
+if [ -z "$1" ]; then
+    echo 'No environment provided'
+    exit 1
+fi
+
+declare -A ENVS
+ENVS[kjanosz.com]="nixos kjanosz.com"
+ENVS[laptop]="nixos laptop"
+
+BASE=`dirname "$(readlink -f "$0")"`
+ENV=$1
+
+GREEN='\033[0;32m'
+RED='\033[0;31m'
+NC='\033[0m' # No Color
+
+check_files() {
+  MODIFIED=0
+  while IFS= read -rd $'\n' file; do
+    if [ ${file: -4} == ".gpg" ]; then
+      path="/`dirname "$file"`/`basename "$file" .gpg`"
+    else
+      path="/$file"
+    fi  
+    
+    if [[ -f "$path"
+          && `stat -c %Y "$path"` -gt `stat -c %Y "$1/$file"`
+          && `diff -q "$path" "$1/$file"` ]]; then
+      echo -e "/$file seem to be newer"
+      MODIFIED=1
+    fi
+  done < <(find "$1" -type f -printf '%P\n')
+  return $MODIFIED
+}
+
+sync_files() {
+  find "$1" -type f -printf '%P\n' | while IFS= read -rd $'\n' file; do
+    path="$1/$file"
+    dir=`dirname "$path"`
+
+    mkdir -p $dir
+    if [ ${file: -4} == ".gpg" ]; then # treat it as an encrypted file
+      file_dir=`dirname "$file"`
+      file_name=`basename "$file" .gpg`
+      echo "Decrypting $file"
+      gpg --no-verbose --quiet --batch --yes --output "/$file_dir/$file_name" --decrypt "$path"
+    else
+      echo "Moving $file"
+      cp -f "$path" "/$file"
+    fi
+  done
+}
+
+SYNC=1
+echo -e "${GREEN}Checking files...${NC}"
+IFS=', ' read -r -a es <<< "${ENVS[$ENV]}"
+for e in "${es[@]}"
+do
+  if [ -d "$BASE/$e" ]; then
+    check_files "$BASE/$e"
+    MODIFIED=$?
+    if [[ $MODIFIED == 1 ]]; then
+      SYNC=0
+    fi
+  fi
+done
+
+if [ $SYNC == 0 ]; then
+  echo
+  echo -e -n "${RED}Some files in / are newer. Are you sure to continue? (y/n) ${NC}"
+  read yn
+  if [[ $yn =~ ^[Yy]$ ]]; then
+    SYNC=1
+  else
+    exit
+  fi
+fi
+
+# sync files
+if [ $SYNC ]; then
+  IFS=', ' read -r -a es <<< "${ENVS[$ENV]}"
+  for e in "${es[@]}"
+  do
+    if [ -d "$BASE/$e" ]; then
+      echo 
+      echo -e "${GREEN}Syncing $e files...${NC}"
+      sync_files "$BASE/$e"
+    fi
+  done
+fi
