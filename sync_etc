@@ -20,9 +20,9 @@ check_files() {
   MODIFIED=0
   while IFS= read -rd $'\n' file; do
     if [ ${file: -4} == ".gpg" ]; then
-      path="/`dirname "$file"`/`basename "$file" .gpg`"
+      path="/etc/`dirname "$file"`/`basename "$file" .gpg`"
     else
-      path="/$file"
+      path="/etc/$file"
     fi  
     
     if [[ -f "$path"
@@ -45,10 +45,10 @@ sync_files() {
       file_dir=`dirname "$file"`
       file_name=`basename "$file" .gpg`
       echo "Decrypting $file"
-      gpg --no-verbose --quiet --batch --yes --output "/$file_dir/$file_name" --decrypt "$path"
+      gpg --no-verbose --quiet --batch --yes --output "/etc/$file_dir/$file_name" --decrypt "$path"
     else
       echo "Moving $file"
-      cp -f "$path" "/$file"
+      cp -f "$path" "/etc/$file"
     fi
   done
 }
@@ -58,8 +58,8 @@ echo -e "${GREEN}Checking files...${NC}"
 IFS=', ' read -r -a es <<< "${ENVS[$ENV]}"
 for e in "${es[@]}"
 do
-  if [ -d "$BASE/$e" ]; then
-    check_files "$BASE/$e"
+  if [ -d "$BASE/etc/$e" ]; then
+    check_files "$BASE/etc/$e"
     MODIFIED=$?
     if [[ $MODIFIED == 1 ]]; then
       SYNC=0
@@ -83,10 +83,10 @@ if [ $SYNC ]; then
   IFS=', ' read -r -a es <<< "${ENVS[$ENV]}"
   for e in "${es[@]}"
   do
-    if [ -d "$BASE/$e" ]; then
+    if [ -d "$BASE/etc/$e" ]; then
       echo 
       echo -e "${GREEN}Syncing $e files...${NC}"
-      sync_files "$BASE/$e"
+      sync_files "$BASE/etc/$e"
     fi
   done
 fi
