@@ -4,8 +4,6 @@ with lib;
 
 let
   cfg = config.nix.channels;
-
-  basePath = "/nix/var/nixpkgs";
   
   allChannels = (mapAttrs (n: c: c // { name = "nixos-${n}"; }) cfg.additional) // {
     "nixpkgs" = {
@@ -16,7 +14,7 @@ let
 
   channelName = c: builtins.replaceStrings ["nixos"] ["nixpkgs"] c.name;
 
-  channelPath = c: builtins.toPath "${basePath}/${c.name}/nixpkgs";
+  channelPath = c: builtins.toPath "${cfg.path}/${c.name}/nixpkgs";
 
   channelExprs = c: "${c.address}/nixexprs.tar.xz";
 
@@ -61,7 +59,7 @@ let
   nixos-rebuild = pkgs.writeScriptBin "nixos-rebuild" ''
     #!${pkgs.bash}/bin/bash
 
-    mkdir -p ${basePath}
+    mkdir -p ${cfg.path}
     
     upgrade=0
     for arg in "$@"; do
@@ -75,14 +73,14 @@ let
 
     GLOBIGNORE=()
     ${concatMapStringsSep "\n" (c: ''
-      if [ ! -d "${basePath}/${c.name}" ] ||
+      if [ ! -d "${cfg.path}/${c.name}" ] ||
          [ $upgrade -eq 1 ]; then
-         rm -rf ${basePath}/${c.name}
-         ln -s ${fetchTarball (channelExprs c)} ${basePath}/${c.name}
+         rm -rf ${cfg.path}/${c.name}
+         ln -s ${fetchTarball (channelExprs c)} ${cfg.path}/${c.name}
       fi
-      GLOBIGNORE=$GLOBIGNORE:${basePath}/${c.name}
+      GLOBIGNORE=$GLOBIGNORE:${cfg.path}/${c.name}
     '') (builtins.attrValues allChannels)}
-    rm -rf ${basePath}/* #*/
+    rm -rf ${cfg.path}/* #*/
     unset GLOBIGNORE
        
     ${config.system.build.nixos-rebuild}/bin/nixos-rebuild "$@"
@@ -91,7 +89,7 @@ let
   nix-env = pkgs.writeScriptBin "nix-env" ''
     #!${pkgs.bash}/bin/bash
     
-    ${pkgs.nix}/bin/nix-env -f ${basePath} "$@"
+    ${pkgs.nix}/bin/nix-env -f ${cfg.path} "$@"
   '';
 in
 {
@@ -99,7 +97,12 @@ in
     nix = {
       channels = mkOption {
         type = types.submodule {
-          options = {          
+          options = {
+            path = mkOption {
+              type = types.path;
+              default = "/nix/var/nixpkgs";
+            };
+           
             base = mkOption {
               type = types.nullOr types.str;
               default = null;
@@ -126,7 +129,7 @@ in
 
     nix.nixPath = (mapAttrsToList channelNixPath allChannels) ++ [     
       "nixos-config=/etc/nixos/configuration.nix"
-      "${basePath}"
+      "${cfg.path}"
     ];
 
     environment.systemPackages = [ nixos-rebuild nix-env ];

@@ -16,7 +16,7 @@
     consoleKeyMap = "pl";
     defaultLocale = "en_DK.UTF-8";
   };
-  
+
   programs.zsh = {
     enable = true;
     enableCompletion = true;
@@ -79,6 +79,7 @@
     ranger
     strace
     unzip
+    usbutils
     vim
     zip
   ];

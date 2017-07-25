@@ -149,6 +149,7 @@ in
     numix-icon-theme-circle
     pass
     pavucontrol
+    pdftk
     python27Packages.py3status
     rofi
     termite
