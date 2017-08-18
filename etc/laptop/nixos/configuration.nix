@@ -7,7 +7,7 @@ in
   imports = [
     ./common.nix
     ./modules/dev.nix
-    ./modules/foxcommerce.nix
+    ./modules/work.nix
   ];
 
   boot.initrd.availableKernelModules = [ "ehci_pci" "ahci" "firewire_ohci" "usbhid" "usb_storage" "sd_mod" "sr_mod" "sdhci_pci" ];
@@ -93,11 +93,7 @@ in
   time.timeZone = "Europe/Warsaw";
 
   nixpkgs.config.allowUnfree = true;
-  nixpkgs.config.packageOverrides = pkgs: with pkgs; {
-    ammonite2_10 = callPackage ./pkgs/ammonite { scala = "2.10"; };
-    ammonite2_11 = callPackage ./pkgs/ammonite { scala = "2.11"; };
-    ammonite2_12 = callPackage ./pkgs/ammonite { scala = "2.12"; };
-    
+  nixpkgs.config.packageOverrides = pkgs: with pkgs; {    
     base16-builder = callPackage ./pkgs/base16-builder { };
 
     desktop_utils = callPackage ./pkgs/desktop_utils { };
@@ -187,7 +183,7 @@ in
          export GTK_DATA_PREFIX=${config.system.path}
       
          # SVG loader for pixbuf (needed for GTK svg icon themes)
-         export GDK_PIXBUF_MODULE_FILE=$(echo ${pkgs.librsvg.out}/lib/gdk-pixbuf-2.0/*/loaders.cache)
+         export GDK_PIXBUF_MODULE_FILE=`echo ${pkgs.librsvg.out}/lib/gdk-pixbuf-2.0/*/loaders.cache` # */
       '';
     };  
   };
@@ -217,10 +213,27 @@ in
       Type = "oneshot";
       RemainAfterExit = "yes";
       ExecStart = ''
-        ${pkgs.bindfs}/bin/bindfs -u kjw -g users -M kjw -p 0600,u+D \
+        ${pkgs.bindfs}/bin/bindfs -u kj -g users -M kjw -p 0600,u+D \
           ${config.users.users.kj.home}/.gnupg ${config.users.users.kjw.home}/.gnupg
       '';
       ExecStop = "${pkgs.utillinux}/bin/umount ${config.users.users.kjw.home}/.gnupg";
+    };
+  };
+
+  systemd.services.passshare = {
+    wantedBy = [ "user-10000.slice" ];
+    partOf = [ "user-10000.slice" ];
+
+    path = [ pkgs.bindfs pkgs.utillinux ];
+    preStart = "mkdir -p ${config.users.users.kjw.home}/.pass";
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = "yes";
+      ExecStart = ''
+        ${pkgs.bindfs}/bin/bindfs -u kj -g users -M kjw -p 0600,u+D \
+          ${config.users.users.kj.home}/.pass ${config.users.users.kjw.home}/.pass
+      '';
+     ExecStop = "${pkgs.utillinux}/bin/umount ${config.users.users.kjw.home}/.pass";
     };
   };
 
@@ -234,7 +247,7 @@ in
       Type = "oneshot";
       RemainAfterExit = "yes";
       ExecStart = ''
-        ${pkgs.bindfs}/bin/bindfs -u kjw -g users -M kjw -p 0600,u+D \
+        ${pkgs.bindfs}/bin/bindfs -u kj -g users -M kjw -p 0600,u+D \
           ${config.users.users.kj.home}/Projects ${config.users.users.kjw.home}/Projects/Private
       '';
       ExecStop = "${pkgs.utillinux}/bin/umount ${config.users.users.kjw.home}/Projects/Private";
@@ -242,7 +255,7 @@ in
   };
 
   systemd.user.services.gnupg = {
-    wantedBy = [ "default.target" ];
+    after = [ "default.target" ];
     
     path = [ pkgs.gnupg ];
     script = ''

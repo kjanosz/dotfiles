@@ -40,7 +40,7 @@ sync_files() {
     path="$1/$file"
     dir=`dirname "$path"`
 
-    mkdir -p $dir
+    mkdir -p "/etc/`dirname $file`"
     if [ ${file: -4} == ".gpg" ]; then # treat it as an encrypted file
       file_dir=`dirname "$file"`
       file_name=`basename "$file" .gpg`
