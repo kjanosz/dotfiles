@@ -48,7 +48,11 @@
   (use-package racer-mode)
   (use-package rustfmt)
   (use-package company-racer)
-  (use-package flycheck-rust))
+  (use-package flycheck-rust)
+  (add-hook 'rust-mode-hook
+            (lambda()
+              (cargo-minor-mode)
+              (racer-mode))))
 
 (use-package scala-mode
   :mode ("\\.scala\\'" "\\.sbt\\'")
