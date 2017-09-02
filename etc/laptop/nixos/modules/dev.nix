@@ -9,8 +9,17 @@ let
       exec ${pkgs.emacs}/bin/emacsclient --alternate-editor ${pkgs.emacs}/bin/emacs "$@"
     fi
   '';
+
+  mozillaOverlays =
+    let
+      version = "7e54fb37cd177e6d83e4e2b7d3e3b03bd6de0e0f";
+    in
+      fetchTarball "https://github.com/mozilla/nixpkgs-mozilla/archive/${version}.tar.gz";
+
+   rustOverlay = builtins.toPath (lib.concatStrings [ mozillaOverlays "/rust-overlay.nix" ]);
 in
 {
+  nixpkgs.overlays = [ (import rustOverlay) ];
   nixpkgs.config.packageOverrides = pkgs: with pkgs; {
     ammonite2_10 = callPackage ../pkgs/ammonite { scala = "2.10"; };
     ammonite2_11 = callPackage ../pkgs/ammonite { scala = "2.11"; };
@@ -34,9 +43,9 @@ in
     stack
     haskellPackages.idris
     cargo
-    rustc
-    rustfmt
-    rustracer
+    pkgs_unstable.rustc
+    pkgs_unstable.rustfmt
+    pkgs_unstable.rustracer
     ammonite2_10
     ammonite2_11
     ammonite2_12
@@ -49,6 +58,7 @@ in
     python
     pkgs_unstable.python27Packages.tensorflow
     racket
+    nodePackages.node2nix
   ];
 
   environment.variables = {
