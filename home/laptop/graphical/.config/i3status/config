@@ -11,6 +11,7 @@ order += "battery 0"
 order += "cpu_usage"
 order += "load"
 order += "disk /"
+order += "disk /var"
 order += "disk /home"
 order += "tztime local"
 
@@ -53,6 +54,12 @@ disk "/" {
 
 disk "/home" {
   format = "/home %free"
+  threshold_type = "percentage_free"
+  low_threshold = 10
+}
+
+disk "/var" {
+  format = "/var %free"
   threshold_type = "percentage_free"
   low_threshold = 10
 }

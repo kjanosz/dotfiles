@@ -20,16 +20,15 @@ check_files() {
   MODIFIED=0
   while IFS= read -rd $'\n' file; do
     if [ ${file: -4} == ".gpg" ]; then
-      path="/etc/`dirname "$file"`/`basename "$file" .gpg`"
+      echo -e "Skipping check of an encrypted file `basename "$file" .gpg`"
     else
       path="/etc/$file"
-    fi  
-    
-    if [[ -f "$path"
-          && `stat -c %Y "$path"` -gt `stat -c %Y "$1/$file"`
-          && `diff -q "$path" "$1/$file"` ]]; then
-      echo -e "/$file seem to be newer"
-      MODIFIED=1
+      if [[ -f "$path"
+            && `stat -c %Y "$path"` -gt `stat -c %Y "$1/$file"`
+            && `diff -q "$path" "$1/$file"` ]]; then
+        echo -e "$file seems to be newer"
+        MODIFIED=1
+      fi
     fi
   done < <(find "$1" -type f -printf '%P\n')
   return $MODIFIED
@@ -45,10 +44,10 @@ sync_files() {
       file_dir=`dirname "$file"`
       file_name=`basename "$file" .gpg`
       echo "Decrypting $file"
-      gpg --no-verbose --quiet --batch --yes --output "/etc/$file_dir/$file_name" --decrypt "$path"
+      gpg --no-verbose --quiet --batch --yes --decrypt "$path" | sudo tee "/etc/$file_dir/$file_name" > /dev/null
     else
       echo "Moving $file"
-      cp -f "$path" "/etc/$file"
+      sudo cp -f "$path" "/etc/$file"
     fi
   done
 }

@@ -1,4 +1,4 @@
-{ config, pkgs, pkgs_unstable, ... }:
+{ config, lib, pkgs, pkgs_unstable, ... }:
 
 let
   secrets = import ./secrets.nix;
@@ -10,57 +10,39 @@ in
     ./modules/work.nix
   ];
 
-  boot.initrd.availableKernelModules = [ "ehci_pci" "ahci" "firewire_ohci" "usbhid" "usb_storage" "sd_mod" "sr_mod" "sdhci_pci" ];
-  boot.kernelModules = [ "kvm-intel" "wl" ];
-  boot.blacklistedKernelModules = [ "bcma" ];	
-  boot.extraModulePackages = [ config.boot.kernelPackages.broadcom_sta ];
-
-  boot.loader.grub.device = "/dev/sda";
-
-  boot.initrd.luks.devices."root".device = "/dev/disk/by-uuid/d8a24a3f-ea68-4b98-a0a4-f6a7613fc5ab";
-
-  fileSystems."/" = {
-    device = "/dev/disk/by-uuid/01fdde08-aff0-409d-b657-1f7b5cacd318";
-    fsType = "ext4";
+  boot = {
+    initrd = {
+      availableKernelModules = [ "xhci_pci" "ahci" "nvme" "sd_mod" "rtsx_pci_sdmmc" ]; 
+      luks.devices."root".device = "/dev/disk/by-uuid/5acd44f5-acd6-4f58-82bc-8d5df37eec05";
+    };
+    kernelModules = [ "kvm-intel" ];
+    kernelPackages = pkgs.linuxPackages_latest;
+    loader = {
+      efi.canTouchEfiVariables = true;
+      grub.efiSupport = true;
+      grub.device = "nodev";
+    };
   };
 
-  fileSystems."/boot" = {
-    device = "/dev/disk/by-uuid/0c6ae963-31eb-4f90-9ca6-a9c8edfcb833";
-    fsType = "ext4";
-  };
+  fileSystems."/" =
+    { device = "/dev/disk/by-uuid/f4b7512f-06a0-497f-8dcf-efb0ee8dcbca";
+      fsType = "ext4";
+    };
 
-  fileSystems."/home" = {
-    device = "/dev/mapper/home"; 
-    fsType = "ext4";
+  fileSystems."/var" =
+    { device = "/dev/disk/by-uuid/65fa4467-160d-4fc9-ad3d-0fafacf5533e";
+      fsType = "ext4";
+    };
 
-    encrypted = {
-      enable = true;
-      blkDev = "/dev/disk/by-uuid/cb5fedef-4b68-4dfa-bb00-e0980a453937";
-      keyFile = "${secrets.homeKey}";
-      label = "home";
-    };  
-  };
+  fileSystems."/boot" =
+    { device = "/dev/disk/by-uuid/7C8A-0FC8";
+      fsType = "vfat";
+    };
 
-  swapDevices = [
-    {
-      device = "/var/swap";
-      size = 12288;
-    }
-  ];
-
-  hardware.pulseaudio = {
-    enable = true;
-    package = pkgs.pulseaudioFull;
-    support32Bit = true;
-    extraConfig = ''
-      load-module module-native-protocol-tcp auth-ip-acl=127.0.0.1
-    '';
-  };
-
-  nix = {
-    buildCores = 4;
-    maxJobs = 4;
-  };  
+  fileSystems."/home" =
+    { device = "/dev/disk/by-uuid/a695162a-3d5d-473d-ba63-b6b7f7dc147b";
+      fsType = "ext4";
+    };
 
   networking = {
     hostName = "nixos";
@@ -70,6 +52,15 @@ in
       enable = true;
       insertNameservers = config.networking.nameservers;
     };
+  };
+
+  hardware.pulseaudio = {
+    enable = true;
+    package = pkgs.pulseaudioFull;
+    support32Bit = true;
+    extraConfig = ''
+      load-module module-native-protocol-tcp auth-ip-acl=127.0.0.1
+    '';
   };
 
   fonts = {
@@ -85,13 +76,21 @@ in
     ];
   };
 
-  i18n.inputMethod = {
-    enabled = "fcitx";
-    fcitx.engines = with pkgs.fcitx-engines; [ m17n table-other ];
+  i18n = {
+    consoleFont = lib.mkForce "Lat2-Terminus32";
+    inputMethod = {
+      enabled = "fcitx";
+      fcitx.engines = with pkgs.fcitx-engines; [ m17n table-other ];
+    };
   };
   
   time.timeZone = "Europe/Warsaw";
 
+  nix = {
+    buildCores = 8;
+    maxJobs = 8;
+  };  
+  
   nixpkgs.config.allowUnfree = true;
   nixpkgs.config.packageOverrides = pkgs: with pkgs; {    
     base16-builder = callPackage ./pkgs/base16-builder { };
@@ -117,7 +116,6 @@ in
     bindfs
     calibre
     chromium
-    conky
     desktop_utils.i3-lock-screen
     desktop_utils.i3-merge-configs
     dropbox
@@ -237,23 +235,6 @@ in
     };
   };
 
-  systemd.services.projectsshare = {
-    wantedBy = [ "user-10000.slice" ];
-    partOf = [ "user-10000.slice" ];
-
-    path = [ pkgs.bindfs pkgs.utillinux ];
-    preStart = "mkdir -p ${config.users.users.kjw.home}/Projects/Private";
-    serviceConfig = {
-      Type = "oneshot";
-      RemainAfterExit = "yes";
-      ExecStart = ''
-        ${pkgs.bindfs}/bin/bindfs -u kj -g users -M kjw -p 0600,u+D \
-          ${config.users.users.kj.home}/Projects ${config.users.users.kjw.home}/Projects/Private
-      '';
-      ExecStop = "${pkgs.utillinux}/bin/umount ${config.users.users.kjw.home}/Projects/Private";
-    };
-  };
-
   systemd.user.services.gnupg = {
     after = [ "default.target" ];
     
@@ -272,7 +253,7 @@ in
     hashedPassword = "${secrets.kjPassword}";
     uid = 1000;
     isNormalUser = true;
-    home = "/home/kjanosz";
+    home = "/home/kj";
     description = "Krzysztof Janosz";
     extraGroups = [ "docker" "networkmanager" "vboxusers" "wheel" ]; 
   };
@@ -281,7 +262,7 @@ in
     hashedPassword = "${secrets.kjwPassword}";
     uid = 10000;
     isNormalUser = true;
-    home = "/home/kjanosz_work";
+    home = "/home/kjw";
     description = "Krzysztof Janosz (Work)";
     extraGroups = [ "docker" "networkmanager" "vboxusers" ];
   };

@@ -1,3 +1,7 @@
+if [ -f "$HOME/.xprofile.extras" ]; then
+  . $HOME/.xprofile.extras
+fi
+
 if [ -f "$HOME/.profile" ]; then
   . $HOME/.profile
 fi
