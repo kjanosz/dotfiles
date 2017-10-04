@@ -12,7 +12,6 @@
   };
     
   i18n = {
-    consoleFont = "Lat2-Terminus16";
     consoleKeyMap = "pl";
     defaultLocale = "en_DK.UTF-8";
   };
@@ -33,7 +32,7 @@
 
   nix = {
     channels = {
-      base = "https://nixos.org/channels/nixos-17.03";
+      base = "https://nixos.org/channels/nixos-17.09";
 
       additional = {
         "unstable" = {
@@ -59,9 +58,11 @@
     calc
     cloc
     coreutils
+    duplicity
     file
     findutils
     git
+    gptfdisk
     gnupg
     gnupg1compat
     gnutar
@@ -84,5 +85,5 @@
     zip
   ];
 
-  system.stateVersion = "17.03";
+  system.stateVersion = "17.09";
 }

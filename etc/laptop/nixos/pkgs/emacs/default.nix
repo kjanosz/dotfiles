@@ -8,12 +8,8 @@ let
     withGTK3 = false;
   };
   
-  base = (pkgs.emacsPackagesNgGen baseNoGTK).override (super: self: {
-    inherit (self.melpaPackages)
-    # Use these from MELPA Unstable:
-    ensime intero ranger;
-  });
-in base.emacsWithPackages (epkgs: with epkgs; [
+  base = (pkgs.emacsPackagesNgGen baseNoGTK);
+in base.emacsWithPackages (epkgs: with epkgs; with epkgs.melpaPackages; [
   # package management
   use-package
 

@@ -6,43 +6,11 @@ in
 {
   imports = [
     ./common.nix
+    ./hardware-configuration.nix
     ./modules/dev.nix
     ./modules/work.nix
+    secrets.config
   ];
-
-  boot = {
-    initrd = {
-      availableKernelModules = [ "xhci_pci" "ahci" "nvme" "sd_mod" "rtsx_pci_sdmmc" ]; 
-      luks.devices."root".device = "/dev/disk/by-uuid/5acd44f5-acd6-4f58-82bc-8d5df37eec05";
-    };
-    kernelModules = [ "kvm-intel" ];
-    kernelPackages = pkgs.linuxPackages_latest;
-    loader = {
-      efi.canTouchEfiVariables = true;
-      grub.efiSupport = true;
-      grub.device = "nodev";
-    };
-  };
-
-  fileSystems."/" =
-    { device = "/dev/disk/by-uuid/f4b7512f-06a0-497f-8dcf-efb0ee8dcbca";
-      fsType = "ext4";
-    };
-
-  fileSystems."/var" =
-    { device = "/dev/disk/by-uuid/65fa4467-160d-4fc9-ad3d-0fafacf5533e";
-      fsType = "ext4";
-    };
-
-  fileSystems."/boot" =
-    { device = "/dev/disk/by-uuid/7C8A-0FC8";
-      fsType = "vfat";
-    };
-
-  fileSystems."/home" =
-    { device = "/dev/disk/by-uuid/a695162a-3d5d-473d-ba63-b6b7f7dc147b";
-      fsType = "ext4";
-    };
 
   networking = {
     hostName = "nixos";
@@ -66,18 +34,16 @@ in
   fonts = {
     enableGhostscriptFonts = true;
     fonts = with pkgs; [
-      anonymousPro
       font-awesome-ttf
-      hack-font
       inconsolata
+      source-code-pro
       terminus_font
-      unifont
-      unifont_upper
     ];
   };
 
   i18n = {
-    consoleFont = lib.mkForce "Lat2-Terminus32";
+    consoleFont = "ter-m24n";
+    consolePackages = with pkgs; [ terminus_font ];
     inputMethod = {
       enabled = "fcitx";
       fcitx.engines = with pkgs.fcitx-engines; [ m17n table-other ];
@@ -149,7 +115,6 @@ in
     termite
     texlive.combined.scheme-full
     thunderbird
-    wineFull
     xss-lock
     zathura
   ];
@@ -196,7 +161,9 @@ in
       [spotify]
       enabled = true
       username = kjanosz
-      password = ${secrets.spotifyPassword}
+      password = ${secrets.spotify.password}
+      client_id = ${secrets.spotify.clientId}
+      client_secret = ${secrets.spotify.clientSecret}
       bitrate = 320
     '';
   };
@@ -231,7 +198,7 @@ in
         ${pkgs.bindfs}/bin/bindfs -u kj -g users -M kjw -p 0600,u+D \
           ${config.users.users.kj.home}/.pass ${config.users.users.kjw.home}/.pass
       '';
-     ExecStop = "${pkgs.utillinux}/bin/umount ${config.users.users.kjw.home}/.pass";
+      ExecStop = "${pkgs.utillinux}/bin/umount ${config.users.users.kjw.home}/.pass";
     };
   };
 

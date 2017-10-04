@@ -4,9 +4,9 @@
   environment.systemPackages = with pkgs_unstable; [
     awscli
     docker_compose
-    ngrok
     nailgun
     shfmt
+    travis
     zoom-us
   ];
 }
