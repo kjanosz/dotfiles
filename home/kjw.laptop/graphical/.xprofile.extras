@@ -1,0 +1,2 @@
+xrandr --output eDP1 --scale 0.75x0.75
+docker-machine start

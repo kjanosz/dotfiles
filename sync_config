@@ -16,7 +16,7 @@ GREEN='\033[0;32m'
 RED='\033[0;31m'
 NC='\033[0m' # No Color
 
-check_files() {
+check_etc_files() {
   MODIFIED=0
   while IFS= read -rd $'\n' file; do
     if [ ${file: -4} == ".gpg" ]; then
@@ -38,16 +38,20 @@ sync_files() {
   find "$1" -type f -printf '%P\n' | while IFS= read -rd $'\n' file; do
     path="$1/$file"
     dir=`dirname "$path"`
+    base="$2"
 
-    mkdir -p "/etc/`dirname $file`"
+    sudo mkdir -p "/$base/`dirname $file`"
     if [ ${file: -4} == ".gpg" ]; then # treat it as an encrypted file
       file_dir=`dirname "$file"`
       file_name=`basename "$file" .gpg`
       echo "Decrypting $file"
-      gpg --no-verbose --quiet --batch --yes --decrypt "$path" | sudo tee "/etc/$file_dir/$file_name" > /dev/null
+      gpg --no-verbose --quiet --batch --yes --decrypt "$path" | \
+        sudo tee "/$base/$file_dir/$file_name" > /dev/null | \
+        sudo chmod --reference="$path" "/$base/$file_dir/$file_name" | \
+        sudo chown --reference="/$base/$file_dir" "/$base/$file_dir/$file_name"
     else
       echo "Moving $file"
-      sudo cp -f "$path" "/etc/$file"
+      sudo cp -f --preserve=mode,timestamps "$path" "/$base/$file"
     fi
   done
 }
@@ -58,7 +62,7 @@ IFS=', ' read -r -a es <<< "${ENVS[$ENV]}"
 for e in "${es[@]}"
 do
   if [ -d "$BASE/etc/$e" ]; then
-    check_files "$BASE/etc/$e"
+    check_etc_files "$BASE/etc/$e"
     MODIFIED=$?
     if [[ $MODIFIED == 1 ]]; then
       SYNC=0
@@ -84,8 +88,14 @@ if [ $SYNC ]; then
   do
     if [ -d "$BASE/etc/$e" ]; then
       echo 
-      echo -e "${GREEN}Syncing $e files...${NC}"
-      sync_files "$BASE/etc/$e"
+      echo -e "${GREEN}Syncing $e files in etc...${NC}"
+      sync_files "$BASE/etc/$e" "etc"
+    fi
+
+    if [ -d "$BASE/var/$e" ]; then
+      echo 
+      echo -e "${GREEN}Syncing $e files in var...${NC}"
+      sync_files "$BASE/var/$e" "var"
     fi
   done
 fi

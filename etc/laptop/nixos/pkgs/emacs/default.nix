@@ -1,6 +1,18 @@
 { pkgs, ... }:
 
 let
+  proofgeneral = pkgs.emacsPackages.proofgeneral_HEAD.overrideAttrs (oldAttrs: rec {
+    name = "proof-general-${version}";
+    version = "2017-12-11";
+
+    src = pkgs.fetchFromGitHub {
+      owner = "ProofGeneral";
+      repo = "PG";
+      rev = "08f4a234a669a2398be37c7fdab41ee9d3dcd6cd";
+      sha256 = "161h1kfi32fpf8b1dq6xbf1ls74220b6cychbmcvixbvjqx522bd";
+    };
+  });
+
   baseNoGTK = pkgs.emacs25.override {
     # Use ‘lucid’ toolkit because of following bug in GTK: https://bugzilla.gnome.org/show_bug.cgi?id=85715
     withX = true;
@@ -28,14 +40,6 @@ in base.emacsWithPackages (epkgs: with epkgs; with epkgs.melpaPackages; [
   helm-ag
   helm-projectile
 
-  # elixir
-  alchemist
-  elixir-mode
-  
-  # go
-  go-mode
-  company-go
-
   # haskell
   haskell-mode
   intero
@@ -48,6 +52,10 @@ in base.emacsWithPackages (epkgs: with epkgs; with epkgs.melpaPackages; [
   # idris
   idris-mode
   helm-idris
+
+  # coq
+  proofgeneral
+  company-coq
   
   # rust 
   cargo
@@ -68,6 +76,7 @@ in base.emacsWithPackages (epkgs: with epkgs; with epkgs.melpaPackages; [
 
   # other
   ansible
+  mmm-mode
   yaml-mode
   company-ansible 
 

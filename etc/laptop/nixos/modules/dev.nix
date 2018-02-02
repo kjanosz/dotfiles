@@ -1,4 +1,4 @@
-{ config, lib, utils, pkgs, pkgs_unstable, ... }:
+{ config, lib, utils, pkgs, ... }:
 
 let
   editorScript = pkgs.writeScriptBin "emacseditor" ''
@@ -12,7 +12,7 @@ let
 
   mozillaOverlays =
     let
-      version = "7e54fb37cd177e6d83e4e2b7d3e3b03bd6de0e0f";
+      version = "661f3f4d8183f493252faaa4e7bf192abcf5d927";
     in
       fetchTarball "https://github.com/mozilla/nixpkgs-mozilla/archive/${version}.tar.gz";
 
@@ -24,41 +24,37 @@ in
     ammonite2_10 = callPackage ../pkgs/ammonite { scala = "2.10"; };
     ammonite2_11 = callPackage ../pkgs/ammonite { scala = "2.11"; };
     ammonite2_12 = callPackage ../pkgs/ammonite { scala = "2.12"; };
-
-    inherit (pkgs_unstable) coursier;
   };
 
   environment.systemPackages = with pkgs; [
     editorScript
     emacs
-    pkgs_unstable.idea.idea-community
+    idea.idea-community
     ack
     ag
     gcc
     gnumake
-    elixir
+    coq
     cabal-install
     ghc
     haskellPackages.structured-haskell-mode
     stack
     haskellPackages.idris
     cargo
-    pkgs_unstable.rustc
-    pkgs_unstable.rustfmt
-    pkgs_unstable.rustracer
+    rustc
+    rustfmt
+    rustracer
     ammonite2_10
     ammonite2_11
     ammonite2_12
-    clojure
     coursier
     openjdk
     sbt
     scala
     visualvm
     python
-    pkgs_unstable.python27Packages.tensorflow
     racket
-    nodePackages.node2nix
+    pgadmin
   ];
 
   environment.variables = {
@@ -67,7 +63,6 @@ in
 
   systemd.user.services.emacs = {
     wantedBy = [ "default.target" ];
-    after = [ "gnupg.service" ];
     
     path = [ pkgs.gnupg ];
     script = ''
@@ -80,8 +75,4 @@ in
       Restart = "always";
     };
   };
-
-  virtualisation.docker.enable = true;
-  virtualisation.rkt.enable = true;
-  virtualisation.virtualbox.host.enable = true;
 }  

@@ -1,15 +1,33 @@
-{ config, lib, pkgs, pkgs_unstable, ... }:
+{ config, lib, pkgs, ... }:
+
+with (import ./lib.nix { inherit pkgs; });
 
 let
   secrets = import ./secrets.nix;
+
+  pkgs_08_01_2018 = nixpkgsOf {
+     rev = "85b84527f636c60bd8c0f0567bb471d491fb5a89";
+     sha256 = "04ylvsa8z52wwbsp6bpx3nrr3ycsd5ambsbwgb8xz1zbx64m7zc1";
+     config = {
+       allowUnfree = true;
+     };
+  };
+
+  mopidy =  moduleFromGitHubOf {
+    path = "services/audio/mopidy.nix";
+    rev = "85b84527f636c60bd8c0f0567bb471d491fb5a89";
+    sha256 = "fc545fcf00d03f6b4ec13f099cbab970bc4a986b8140c78397c413dd7e5e9828";
+  };
 in
 {
   imports = [
     ./common.nix
     ./hardware-configuration.nix
     ./modules/dev.nix
+    ./modules/gpg-profiles.nix
     ./modules/work.nix
     secrets.config
+    mopidy
   ];
 
   networking = {
@@ -56,20 +74,23 @@ in
     buildCores = 8;
     maxJobs = 8;
   };  
-  
-  nixpkgs.config.allowUnfree = true;
-  nixpkgs.config.packageOverrides = pkgs: with pkgs; {    
-    base16-builder = callPackage ./pkgs/base16-builder { };
 
-    desktop_utils = callPackage ./pkgs/desktop_utils { };
+  nixpkgs.config = {
+    allowUnfree = true;
 
-    emacs = callPackage ./pkgs/emacs { };
+    packageOverrides = pkgs: with pkgs; {    
+      base16-builder = callPackage ./pkgs/base16-builder { };
 
-    calibre = pkgs.calibre.overrideAttrs (oldAttrs: {
-      buildInputs = oldAttrs.buildInputs ++ [ python27Packages.dns ];
-    });
+      calibre = pkgs.calibre.overrideAttrs (oldAttrs: {
+        buildInputs = oldAttrs.buildInputs ++ [ python27Packages.dns ];
+      });
 
-    inherit (pkgs_unstable) i3;
+      desktop_utils = callPackage ./pkgs/desktop_utils { };
+
+      emacs = callPackage ./pkgs/emacs { };
+
+      mopidy = pkgs_08_01_2018.mopidy;
+    };
   };
 
   environment.systemPackages = with pkgs; [
@@ -81,26 +102,25 @@ in
     base16-builder
     bindfs
     calibre
-    chromium
     desktop_utils.i3-lock-screen
     desktop_utils.i3-merge-configs
     dropbox
     dunst
     exiv2
-    firefox
     feh
     ghostscript
     gimp-with-plugins
     gtk-engine-murrine
-    haskellPackages.hledger
     i3lock
     i3status
     imagemagick
+    imgurbash2
     inkscape
     keepassx2
     libnotify
     libreoffice
     lightdm
+    lm_sensors
     mpv
     ncmpcpp
     networkmanagerapplet
@@ -110,11 +130,10 @@ in
     pass
     pavucontrol
     pdftk
-    python27Packages.py3status
     rofi
     termite
     texlive.combined.scheme-full
-    thunderbird
+    upower
     xss-lock
     zathura
   ];
@@ -122,6 +141,8 @@ in
   programs.ssh.startAgent = false;
   
   services.pcscd.enable = true;
+
+  services.upower.enable = true;
 
   services.xserver = {
     enable = true;
@@ -153,19 +174,55 @@ in
 
   services.mopidy = {
     enable = true;
-    extensionPackages = [ pkgs.mopidy-mopify pkgs.mopidy-spotify pkgs.mopidy-spotify-tunigo ];
+    dataDir = "/var/lib/mopidy";
+    extensionPackages = with pkgs_08_01_2018; [ mopidy-mopify mopidy-spotify mopidy-youtube ];
     configuration = ''
       [audio]
       output = pulsesink server=127.0.0.1
-
-      [spotify]
-      enabled = true
-      username = kjanosz
-      password = ${secrets.spotify.password}
-      client_id = ${secrets.spotify.clientId}
-      client_secret = ${secrets.spotify.clientSecret}
-      bitrate = 320
     '';
+    extraConfigFiles = [ "${config.services.mopidy.dataDir}/spotify.conf" ];
+  };
+
+  services.gnupg.profiles = {
+    default = {
+      gpg-agent = ''
+        default-cache-ttl 10
+        max-cache-ttl 10
+
+        enable-ssh-support
+        default-cache-ttl-ssh 10
+        max-cache-ttl-ssh 10
+      '';
+
+      scdaemon = ''
+        deny-admin
+        reader-port "Yubico Yubikey 4 OTP+U2F+CCID"
+        card-timeout 60
+      '';
+    };
+
+    additional = {
+      internal-reader = {
+        scdaemon = ''
+          reader-port "Broadcom Corp 5880 [Contacted SmartCard] (0123456789ABCD)"
+          card-timeout 1
+        '';
+      };
+
+      mobile-reader = {
+        scdaemon = ''
+          reader-port "Gemalto USB Shell Token V2 (FF4C23A4)"
+          card-timeout 1
+        '';
+      };
+
+      pinpad-reader = {
+        scdaemon = ''
+          reader-port "Cherry GmbH SmartTerminal ST-2xxx [Vendor Interface] (21121451108871)"
+          card-timeout 1
+        '';
+      };
+    };
   };
 
   systemd.services.gnupgshare = {
@@ -202,35 +259,46 @@ in
     };
   };
 
-  systemd.user.services.gnupg = {
-    after = [ "default.target" ];
-    
-    path = [ pkgs.gnupg ];
-    script = ''
-      gpg-agent --homedir $HOME/.gnupg --use-standard-socket --daemon
-    '';
-    serviceConfig = {
-      Type = "forking";
-      Restart = "always";
-      KillSignal = "SIGKILL";
-    };
-  };
-
   users.extraUsers.kj = {
-    hashedPassword = "${secrets.kjPassword}";
+    hashedPassword = "${secrets.users.kj.password}";
     uid = 1000;
     isNormalUser = true;
     home = "/home/kj";
     description = "Krzysztof Janosz";
-    extraGroups = [ "docker" "networkmanager" "vboxusers" "wheel" ]; 
+    extraGroups = [ "docker" "networkmanager" "vboxusers" "wheel" ];
+    packages = with pkgs; [ hledger hledger-web chromium firefox thunderbird wine winetricks ];
   };
 
   users.extraUsers.kjw = {
-    hashedPassword = "${secrets.kjwPassword}";
+    hashedPassword = "${secrets.users.kjw.password}";
     uid = 10000;
     isNormalUser = true;
     home = "/home/kjw";
     description = "Krzysztof Janosz (Work)";
     extraGroups = [ "docker" "networkmanager" "vboxusers" ];
+    packages = with pkgs; [ chromium ];
   };
+
+  services.udev.extraRules = ''
+    SUBSYSTEMS=="usb", ATTRS{idVendor}=="2581", ATTRS{idProduct}=="1b7c", MODE="0660", GROUP="users"
+    SUBSYSTEMS=="usb", ATTRS{idVendor}=="2581", ATTRS{idProduct}=="2b7c", MODE="0660", GROUP="users"
+    SUBSYSTEMS=="usb", ATTRS{idVendor}=="2581", ATTRS{idProduct}=="3b7c", MODE="0660", GROUP="users"
+    SUBSYSTEMS=="usb", ATTRS{idVendor}=="2581", ATTRS{idProduct}=="4b7c", MODE="0660", GROUP="users"
+    SUBSYSTEMS=="usb", ATTRS{idVendor}=="2581", ATTRS{idProduct}=="1807", MODE="0660", GROUP="users"
+    SUBSYSTEMS=="usb", ATTRS{idVendor}=="2581", ATTRS{idProduct}=="1808", MODE="0660", GROUP="users"
+    SUBSYSTEMS=="usb", ATTRS{idVendor}=="2c97", ATTRS{idProduct}=="0000", MODE="0660", GROUP="users"
+    SUBSYSTEMS=="usb", ATTRS{idVendor}=="2c97", ATTRS{idProduct}=="0001", MODE="0660", GROUP="users"
+    SUBSYSTEMS=="usb", ATTRS{idVendor}=="2581", ATTRS{idProduct}=="1b7c", MODE="0660", TAG+="uaccess", TAG+="udev-acl"
+    SUBSYSTEMS=="usb", ATTRS{idVendor}=="2581", ATTRS{idProduct}=="2b7c", MODE="0660", TAG+="uaccess", TAG+="udev-acl"
+    SUBSYSTEMS=="usb", ATTRS{idVendor}=="2581", ATTRS{idProduct}=="3b7c", MODE="0660", TAG+="uaccess", TAG+="udev-acl"
+    SUBSYSTEMS=="usb", ATTRS{idVendor}=="2581", ATTRS{idProduct}=="4b7c", MODE="0660", TAG+="uaccess", TAG+="udev-acl"
+    SUBSYSTEMS=="usb", ATTRS{idVendor}=="2581", ATTRS{idProduct}=="1807", MODE="0660", TAG+="uaccess", TAG+="udev-acl"
+    SUBSYSTEMS=="usb", ATTRS{idVendor}=="2581", ATTRS{idProduct}=="1808", MODE="0660", TAG+="uaccess", TAG+="udev-acl"
+    SUBSYSTEMS=="usb", ATTRS{idVendor}=="2c97", ATTRS{idProduct}=="0000", MODE="0660", TAG+="uaccess", TAG+="udev-acl"
+    SUBSYSTEMS=="usb", ATTRS{idVendor}=="2c97", ATTRS{idProduct}=="0001", MODE="0660", TAG+="uaccess", TAG+="udev-acl"
+  '';
+  
+  virtualisation.docker.enable = true;
+  virtualisation.virtualbox.host.enable = true;
+  virtualisation.virtualbox.host.enableHardening = true;
 }

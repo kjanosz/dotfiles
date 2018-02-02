@@ -1,9 +1,8 @@
-{ config, lib, pkgs, pkgs_unstable, ... }:
+{ config, lib, pkgs, ... }:
 
 {
   imports = [
     <nixpkgs/nixos/modules/installer/scan/not-detected.nix>
-    ./modules/channels.nix
   ];
 
   boot.loader.grub = {
@@ -31,27 +30,15 @@
   };
 
   nix = {
-    channels = {
-      base = "https://nixos.org/channels/nixos-17.09";
-
-      additional = {
-        "unstable" = {
-          address = "https://nixos.org/channels/nixos-unstable";
-        };
-      };
-    };
     gc = {
       automatic = true;
       dates = "weekly";
-      options = "--delete-older-than 30d";
+      options = "--delete-older-than 14d";
     };
     useSandbox = true;
   };
 
   nixpkgs.config.allowUnfree = false;
-  nixpkgs.config.packageOverrides = pkgs: with pkgs; {
-    inherit (pkgs_unstable) lnav oh-my-zsh;
-  };
   
   environment.pathsToLink = [ "/share/oh-my-zsh" ];
   environment.systemPackages = with pkgs; [
@@ -75,9 +62,11 @@
     nix-repl
     oh-my-zsh
     pciutils
+    pcsctools
     psmisc
     pwgen
     ranger
+    smartmontools
     strace
     unzip
     usbutils

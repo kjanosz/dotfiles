@@ -2,20 +2,6 @@
 
 
 ;;; Code:
-
-(use-package go-mode
-  :mode "\\.go\\'"
-  :config
-  (use-package company-go)
-  (add-hook 'go-mode-hook
-            (lambda ()
-              (add-hook 'before-save-hook 'gofmt-before-save)
-              (setq gofmt-command "goimports"
-                    compile-command "go build -v && go test -v && go vet"
-                    tab-width 4)
-              (set (make-local-variable 'company-backends) '(company-go))
-              (company-mode))))
-
 (use-package haskell-mode
   :config
   (use-package intero)
@@ -26,12 +12,17 @@
   (use-package flycheck-haskell)
   (add-hook 'haskell-mode-hook
             (lambda()
-              (intero-mode)
               (structured-haskell-mode))))
 
 (use-package idris-mode
   :config
   (use-package helm-idris))
+
+(use-package proof-site
+  :config
+  (use-package coq-mode)
+  (use-package company-coq))
+
 
 (use-package python-mode
   :mode "\\.py\\'"
