@@ -26,7 +26,7 @@ in
     ./modules/dev.nix
     ./modules/gpg-profiles.nix
     ./modules/work.nix
-    secrets.config
+    secrets
     mopidy
   ];
 
@@ -117,6 +117,8 @@ in
     imgurbash2
     inkscape
     keepassx2
+    keybase
+    keybase-gui
     libnotify
     libreoffice
     lightdm
@@ -137,6 +139,8 @@ in
     xss-lock
     zathura
   ];
+
+  programs.browserpass.enable = true;
   
   programs.ssh.startAgent = false;
   
@@ -225,6 +229,12 @@ in
     };
   };
 
+  services.keybase.enable = true;
+  services.kbfs = {
+    enable = true;
+    mountPoint = "%h/Shared/Keybase";
+  };
+
   systemd.services.gnupgshare = {
     wantedBy = [ "user-10000.slice" ];
     partOf = [ "user-10000.slice" ];
@@ -260,7 +270,7 @@ in
   };
 
   users.extraUsers.kj = {
-    hashedPassword = "${secrets.users.kj.password}";
+    passwordFile = "/var/lib/users/kj.password";
     uid = 1000;
     isNormalUser = true;
     home = "/home/kj";
@@ -270,7 +280,7 @@ in
   };
 
   users.extraUsers.kjw = {
-    hashedPassword = "${secrets.users.kjw.password}";
+    passwordFile = "/var/lib/users/kjw.password";
     uid = 10000;
     isNormalUser = true;
     home = "/home/kjw";
@@ -279,6 +289,7 @@ in
     packages = with pkgs; [ chromium ];
   };
 
+  # Ledger Nano S
   services.udev.extraRules = ''
     SUBSYSTEMS=="usb", ATTRS{idVendor}=="2581", ATTRS{idProduct}=="1b7c", MODE="0660", GROUP="users"
     SUBSYSTEMS=="usb", ATTRS{idVendor}=="2581", ATTRS{idProduct}=="2b7c", MODE="0660", GROUP="users"

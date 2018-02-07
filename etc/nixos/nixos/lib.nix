@@ -9,8 +9,8 @@ rec {
       inherit rev sha256;
     }) { inherit config; }).pkgs;
 
-  moduleFromGitHubOf = { path, rev, sha256, owner ? "NixOS", repo ? "nixpkgs" }: moduleOf {
-    url = "https://raw.githubusercontent.com/${owner}/${repo}/${rev}/nixos/modules/${path}";
+  moduleFromGitHubOf = { path, rev, sha256, owner ? "NixOS", repo ? "nixpkgs", basePath ? "nixos/modules/" }: moduleOf {
+    url = "https://raw.githubusercontent.com/${owner}/${repo}/${rev}/${basePath}${path}";
     overwrites = path;
     
     inherit sha256;
