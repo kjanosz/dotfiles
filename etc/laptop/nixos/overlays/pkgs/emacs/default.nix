@@ -1,15 +1,16 @@
 { pkgs, ... }:
 
 let
+  # 2018-04-22T12:37:22+02:00
   proofgeneral = pkgs.emacsPackages.proofgeneral_HEAD.overrideAttrs (oldAttrs: rec {
     name = "proof-general-${version}";
-    version = "2017-12-11";
+    version = "7379232";
 
     src = pkgs.fetchFromGitHub {
       owner = "ProofGeneral";
       repo = "PG";
-      rev = "08f4a234a669a2398be37c7fdab41ee9d3dcd6cd";
-      sha256 = "161h1kfi32fpf8b1dq6xbf1ls74220b6cychbmcvixbvjqx522bd";
+      rev = "73792323172e289b531afc086d3f97323b28ecb6";
+      sha256 = "15kxzbsqa5rb2z3yvjlngz5y4z6vr5gca3npdz75awxwiblajz86";
     };
   });
 
@@ -55,6 +56,7 @@ in base.emacsWithPackages (epkgs: with epkgs; with epkgs.melpaPackages; [
 
   # coq
   proofgeneral
+  coq-commenter
   company-coq
   
   # rust 

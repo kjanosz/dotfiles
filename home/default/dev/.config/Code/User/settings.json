@@ -1,0 +1,11 @@
+{
+    "gitProjectManager.baseProjectsFolders": [
+        "~/Dev"
+    ],
+    "gitlens.advanced.messages": {
+        "suppressShowKeyBindingsNotice": true
+    },
+    "languageServerHaskell.useCustomHieWrapper": true,
+    "languageServerHaskell.useCustomHieWrapperPath": "${workspaceFolder}/hie.sh",
+    "metals.sbt.enabled": true
+}

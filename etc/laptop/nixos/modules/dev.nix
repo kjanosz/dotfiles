@@ -1,4 +1,6 @@
-{ config, lib, utils, pkgs, ... }:
+{ config, lib, pkgs, ... }:
+
+with lib;
 
 let
   editorScript = pkgs.writeScriptBin "emacseditor" ''
@@ -9,57 +11,71 @@ let
       exec ${pkgs.emacs}/bin/emacsclient --alternate-editor ${pkgs.emacs}/bin/emacs "$@"
     fi
   '';
-
-  mozillaOverlays =
-    let
-      version = "661f3f4d8183f493252faaa4e7bf192abcf5d927";
-    in
-      fetchTarball "https://github.com/mozilla/nixpkgs-mozilla/archive/${version}.tar.gz";
-
-   rustOverlay = builtins.toPath (lib.concatStrings [ mozillaOverlays "/rust-overlay.nix" ]);
 in
 {
-  nixpkgs.overlays = [ (import rustOverlay) ];
-  nixpkgs.config.packageOverrides = pkgs: with pkgs; {
-    ammonite2_10 = callPackage ../pkgs/ammonite { scala = "2.10"; };
-    ammonite2_11 = callPackage ../pkgs/ammonite { scala = "2.11"; };
-    ammonite2_12 = callPackage ../pkgs/ammonite { scala = "2.12"; };
-  };
-
   environment.systemPackages = with pkgs; [
-    editorScript
-    emacs
-    idea.idea-community
+    # general
+    bazel
+    dbeaver
+    docker_compose
+    insomnia
+    # toolchain
     ack
     ag
     gcc
     gnumake
+    # ide
+    editorScript
+    emacs
+    idea.idea-community
+    vscode
+    # coq
     coq
+    # haskell
+    cabal2nix
     cabal-install
     ghc
+    haskell-ide-engine
     haskellPackages.structured-haskell-mode
-    stack
+    # idris
     haskellPackages.idris
-    cargo
-    rustc
+    # rust
+    rustChannels.stable
     rustfmt
     rustracer
-    ammonite2_10
+    # scala & JVM
     ammonite2_11
     ammonite2_12
     coursier
+    mill
     openjdk
     sbt
     scala
     visualvm
+    # python
     python
+    # racket
     racket
-    pgadmin
   ];
 
   environment.variables = {
-    EDITOR = lib.mkOverride 900 "${editorScript}/bin/emacseditor";
+    EDITOR = mkOverride 900 "${editorScript}/bin/emacseditor";
   };
+
+  programs.adb.enable = true;
+
+  virtualisation.docker.enable = true;
+  virtualisation.virtualbox.host.enable = true;
+  virtualisation.virtualbox.host.enableHardening = true;
+
+  users.users.kj = {
+    extraGroups = [ "adbusers" "docker" "vboxusers" ];
+    packages = with pkgs; [
+      gopass
+      summon
+      wireshark
+    ];
+  };  
 
   systemd.user.services.emacs = {
     wantedBy = [ "default.target" ];

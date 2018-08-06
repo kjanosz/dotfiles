@@ -16,23 +16,10 @@ GREEN='\033[0;32m'
 RED='\033[0;31m'
 NC='\033[0m' # No Color
 
-check_etc_files() {
-  MODIFIED=0
-  while IFS= read -rd $'\n' file; do
-    if [ ${file: -4} == ".gpg" ]; then
-      echo -e "Skipping check of an encrypted file `basename "$file" .gpg`"
-    else
-      path="/etc/$file"
-      if [[ -f "$path"
-            && `stat -c %Y "$path"` -gt `stat -c %Y "$1/$file"`
-            && `diff -q "$path" "$1/$file"` ]]; then
-        echo -e "$file seems to be newer"
-        MODIFIED=1
-      fi
-    fi
-  done < <(find "$1" -type f -printf '%P\n')
-  return $MODIFIED
-}
+trap '
+  trap - INT # restore default INT handler
+  kill -s INT "$$"
+' INT
 
 sync_files() {
   find "$1" -type f -printf '%P\n' | while IFS= read -rd $'\n' file; do
@@ -56,46 +43,19 @@ sync_files() {
   done
 }
 
-SYNC=1
-echo -e "${GREEN}Checking files...${NC}"
+# sync files
 IFS=', ' read -r -a es <<< "${ENVS[$ENV]}"
 for e in "${es[@]}"
 do
   if [ -d "$BASE/etc/$e" ]; then
-    check_etc_files "$BASE/etc/$e"
-    MODIFIED=$?
-    if [[ $MODIFIED == 1 ]]; then
-      SYNC=0
-    fi
+    echo 
+    echo -e "${GREEN}Syncing $e files in etc...${NC}"
+    sync_files "$BASE/etc/$e" "etc"
+  fi
+
+  if [ -d "$BASE/var/$e" ]; then
+    echo 
+    echo -e "${GREEN}Syncing $e files in var...${NC}"
+    sync_files "$BASE/var/$e" "var"
   fi
 done
-
-if [ $SYNC == 0 ]; then
-  echo
-  echo -e -n "${RED}Some files in / are newer. Are you sure to continue? (y/n) ${NC}"
-  read yn
-  if [[ $yn =~ ^[Yy]$ ]]; then
-    SYNC=1
-  else
-    exit
-  fi
-fi
-
-# sync files
-if [ $SYNC ]; then
-  IFS=', ' read -r -a es <<< "${ENVS[$ENV]}"
-  for e in "${es[@]}"
-  do
-    if [ -d "$BASE/etc/$e" ]; then
-      echo 
-      echo -e "${GREEN}Syncing $e files in etc...${NC}"
-      sync_files "$BASE/etc/$e" "etc"
-    fi
-
-    if [ -d "$BASE/var/$e" ]; then
-      echo 
-      echo -e "${GREEN}Syncing $e files in var...${NC}"
-      sync_files "$BASE/var/$e" "var"
-    fi
-  done
-fi

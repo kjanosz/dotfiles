@@ -1,44 +1,34 @@
 { config, lib, pkgs, ... }:
 
-with (import ./lib.nix { inherit pkgs; });
+with (import ./lib.nix);
 
-let
-  secrets = import ./secrets.nix;
-
-  pkgs_08_01_2018 = nixpkgsOf {
-     rev = "85b84527f636c60bd8c0f0567bb471d491fb5a89";
-     sha256 = "04ylvsa8z52wwbsp6bpx3nrr3ycsd5ambsbwgb8xz1zbx64m7zc1";
-     config = {
-       allowUnfree = true;
-     };
-  };
-
-  mopidy =  moduleFromGitHubOf {
-    path = "services/audio/mopidy.nix";
-    rev = "85b84527f636c60bd8c0f0567bb471d491fb5a89";
-    sha256 = "fc545fcf00d03f6b4ec13f099cbab970bc4a986b8140c78397c413dd7e5e9828";
-  };
-in
 {
   imports = [
     ./common.nix
-    ./hardware-configuration.nix
+    ./secrets.nix
+    ./modules/albacross.nix
+    ./modules/coya.nix
     ./modules/dev.nix
     ./modules/gpg-profiles.nix
-    ./modules/work.nix
-    secrets
-    mopidy
   ];
 
   networking = {
     hostName = "nixos";
     extraHosts = "127.0.0.1 ${config.networking.hostName}";
-    nameservers = [ "130.255.73.90" "104.238.186.189" "185.121.177.177" "185.121.177.53" "50.116.40.226" ]; # OpenNIC DNS servers with DNSCrypt enabled
+   nameservers = [ "130.255.73.90" "104.238.186.189" "185.121.177.177" "185.121.177.53" "50.116.40.226" ]; # OpenNIC DNS servers with DNSCrypt enabled
     networkmanager = {
       enable = true;
       insertNameservers = config.networking.nameservers;
     };
   };
+
+  hardware.bluetooth = {
+    enable = true;
+    extraConfig = ''
+      [General]
+      Enable=Source,Sink,Media,Socket
+    '';
+  };  
 
   hardware.pulseaudio = {
     enable = true;
@@ -74,24 +64,25 @@ in
     buildCores = 8;
     maxJobs = 8;
   };  
+  
+  nixpkgs = {
+    config.allowUnfree = true;
+    overlays = [ (import ./overlays) ];
+  };  
 
-  nixpkgs.config = {
-    allowUnfree = true;
+  environment.extraInit = let
+    cp = "cp --no-preserve=mode --remove-destination --symbolic-link --recursive";
+  in ''
+    if [ "$USER" != "root" ]; then
+      GLOBAL="/run/current-system/sw/lib/mozilla/native-messaging-hosts"
+      PER_USER="etc/per-user-pkgs/$USER/lib/mozilla/native-messaging-hosts"
 
-    packageOverrides = pkgs: with pkgs; {    
-      base16-builder = callPackage ./pkgs/base16-builder { };
-
-      calibre = pkgs.calibre.overrideAttrs (oldAttrs: {
-        buildInputs = oldAttrs.buildInputs ++ [ python27Packages.dns ];
-      });
-
-      desktop_utils = callPackage ./pkgs/desktop_utils { };
-
-      emacs = callPackage ./pkgs/emacs { };
-
-      mopidy = pkgs_08_01_2018.mopidy;
-    };
-  };
+      rm -rf $HOME/.mozilla/native-messaging-hosts
+      mkdir -p $HOME/.mozilla/native-messaging-hosts
+      [ -d "$GLOBAL" ] && ${cp} "$GLOBAL"  "$HOME/.mozilla/"
+      [ -d "$PER_USER" ] && ${cp} "$PER_USER" "$HOME/.mozilla/"
+    fi  
+  '';
 
   environment.systemPackages = with pkgs; [
     acpi
@@ -101,6 +92,7 @@ in
     aspellDicts.pl
     base16-builder
     bindfs
+    blueman
     calibre
     desktop_utils.i3-lock-screen
     desktop_utils.i3-merge-configs
@@ -108,6 +100,7 @@ in
     dunst
     exiv2
     feh
+    firefox
     ghostscript
     gimp-with-plugins
     gtk-engine-murrine
@@ -126,21 +119,25 @@ in
     mpv
     ncmpcpp
     networkmanagerapplet
+    nix-prefetch-scripts
     numix-gtk-theme
     numix-icon-theme
     numix-icon-theme-circle
     pass
+    pass-otp
     pavucontrol
     pdftk
     rofi
+    rofi-pass
     termite
     texlive.combined.scheme-full
+    tomb
+    unrar
     upower
+    xsel
     xss-lock
     zathura
   ];
-
-  programs.browserpass.enable = true;
   
   programs.ssh.startAgent = false;
   
@@ -179,7 +176,7 @@ in
   services.mopidy = {
     enable = true;
     dataDir = "/var/lib/mopidy";
-    extensionPackages = with pkgs_08_01_2018; [ mopidy-mopify mopidy-spotify mopidy-youtube ];
+    extensionPackages = with pkgs; [ mopidy-mopify mopidy-spotify ];
     configuration = ''
       [audio]
       output = pulsesink server=127.0.0.1
@@ -269,23 +266,23 @@ in
     };
   };
 
-  users.extraUsers.kj = {
+  users.users.kj = {
     passwordFile = "/var/lib/users/kj.password";
     uid = 1000;
     isNormalUser = true;
     home = "/home/kj";
     description = "Krzysztof Janosz";
-    extraGroups = [ "docker" "networkmanager" "vboxusers" "wheel" ];
-    packages = with pkgs; [ hledger hledger-web chromium firefox thunderbird wine winetricks ];
+    extraGroups = [ "networkmanager" "wheel" ];
+    packages = with pkgs; [ hledger hledger-web chromium thunderbird wine winetricks gnugo qgo stockfish scid ];
   };
 
-  users.extraUsers.kjw = {
+  users.users.kjw = {
     passwordFile = "/var/lib/users/kjw.password";
     uid = 10000;
     isNormalUser = true;
     home = "/home/kjw";
     description = "Krzysztof Janosz (Work)";
-    extraGroups = [ "docker" "networkmanager" "vboxusers" ];
+    extraGroups = [ "networkmanager" ];
     packages = with pkgs; [ chromium ];
   };
 
@@ -308,8 +305,4 @@ in
     SUBSYSTEMS=="usb", ATTRS{idVendor}=="2c97", ATTRS{idProduct}=="0000", MODE="0660", TAG+="uaccess", TAG+="udev-acl"
     SUBSYSTEMS=="usb", ATTRS{idVendor}=="2c97", ATTRS{idProduct}=="0001", MODE="0660", TAG+="uaccess", TAG+="udev-acl"
   '';
-  
-  virtualisation.docker.enable = true;
-  virtualisation.virtualbox.host.enable = true;
-  virtualisation.virtualbox.host.enableHardening = true;
 }

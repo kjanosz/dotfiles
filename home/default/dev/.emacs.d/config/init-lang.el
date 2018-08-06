@@ -20,9 +20,10 @@
 
 (use-package proof-site
   :config
-  (use-package coq-mode)
-  (use-package company-coq))
-
+  (use-package coq-commenter)
+  (use-package company-coq)
+  (add-hook 'coq-mode-hook 'coq-commenter-mode)
+  (add-hook 'coq-mode-hook #'company-coq-mode))
 
 (use-package python-mode
   :mode "\\.py\\'"

@@ -74,5 +74,5 @@
     zip
   ];
 
-  system.stateVersion = "17.09";
+  system.stateVersion = "18.03";
 }
