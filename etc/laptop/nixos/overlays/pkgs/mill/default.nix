@@ -2,10 +2,10 @@
 
 stdenv.mkDerivation rec {
   name = "mill-${version}";
-  version = "0.2.6";
+  version = "0.2.8";
   src = fetchurl {
-    url = "https://github.com/lihaoyi/Ammonite/releases/download/${version}/${version}";
-    sha256 = "0khzr7i49i88rxx6x39m8ln08byv99prqysrsldc02hblb1ab6fn";
+    url = "https://github.com/lihaoyi/mill/releases/download/${version}/${version}";
+    sha256 = "0sy3ghzlsdkrgg3mqap0x6vbsh45lzriyq9v8sqvia5s2f354pd3";
   };
 
   phases = [ "installPhase" ];

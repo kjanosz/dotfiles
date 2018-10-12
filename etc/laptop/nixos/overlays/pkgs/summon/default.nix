@@ -1,18 +1,30 @@
-{ fetchFromGitHub, buildGoPackage, ... }:
+{ lib, fetchFromGitHub, buildGoPackage, makeWrapper, ... }:
 
-buildGoPackage rec {
-  name = "${pname}-${version}";
-  pname = "summon";
-  version = "0.6.6";
+with lib;
 
-  goPackagePath = "github.com/cyberark/${pname}";
+rec {
+  generic = buildGoPackage rec {
+    name = "summon-${version}";
+    version = "0.6.8";
+    goPackagePath = "github.com/cyberark/summon";
 
-  goDeps = ./deps.nix;
-  
-  src = fetchFromGitHub {
-    owner = "cyberark";
-    repo = "${pname}";
-    rev = "v${version}";
-    sha256 = "1l0qkf0i3vcv53h31hy7699xa3km9krqn2qabzi4v95hgkri4mr2";
+    src = fetchFromGitHub {
+      owner = "cyberark";
+      repo = "summon";
+      rev = "v${version}";
+      sha256 = "09nm8qs72ix0pfg4f8y8ajn4k80hg87v38w3hxpk02lqpwvxzib0";
+    };
   };
-}  
+
+  withPlugins = { providers }: generic.overrideAttrs (oldAttrs: rec {
+    buildInputs = [ makeWrapper ] ++ providers;
+
+    patches = [ ./custom-provider-dir.patch ];
+
+    postInstall = ''
+      mkdir -p $bin/lib/summon
+      ${concatMapStringsSep "\n" (p: "cp --symbolic-link " + p + "/bin/* $bin/lib/summon") providers}
+      wrapProgram $bin/bin/summon --set SUMMON_PROVIDER_DIR "$bin/lib/summon"
+    '';
+  });
+}

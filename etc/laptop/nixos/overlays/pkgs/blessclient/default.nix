@@ -6,7 +6,7 @@ let
     version = "0.3.0";
     name = "${pname}-${version}";
 
-    pythonPath = with python27Packages; [ boto3 docutils ];
+    pythonPath = with python27Packages; [ boto3 ];
     
     src = python27Packages.fetchPypi {
       inherit pname version;
@@ -15,17 +15,17 @@ let
 
     doCheck = false;
   };
-in 
+in # 2018-10-04T07:24:39+10:00
 python27Packages.buildPythonApplication rec {
   name = "blessclient-${version}";
-  version = "778094a";
+  version = "HEAD";
 
-  pythonPath = with python27Packages; [ boto3 psutil kmsauth six tkinter docutils ];
+  pythonPath = with python27Packages; [ boto3 psutil kmsauth six hvac ];
 
   src = fetchFromGitHub {
     owner = "lyft";
     repo = "python-blessclient";
-    rev = "778094a49e13d85a3a51d886f2506ae172d34b7b";
-    sha256 = "06ppp90w03win1zmjvin82p5zvag5vjbv3kd52zspad10wg4kpwh";
+    rev = "0bdv9b8l62njl39wn3wyhwqsfph0c7sjdjsb8k2aqw94a7zkd2gr";
+    sha256 = "";
   };
 }

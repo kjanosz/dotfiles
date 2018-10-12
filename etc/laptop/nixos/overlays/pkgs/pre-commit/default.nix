@@ -63,7 +63,7 @@ let
 
   precommit = python27.pkgs.buildPythonApplication rec {
     pname = "pre_commit";
-    version = "1.8.2";
+    version = "1.11.2";
     name = "${pname}-${version}";
 
     pythonPath = with python27Packages; [ aspy_yaml cfgv cached-property identify nodeenv six pyyaml virtualenv  ];

@@ -6,16 +6,15 @@ with (import ./lib.nix);
   imports = [
     ./common.nix
     ./secrets.nix
-    ./modules/albacross.nix
-    ./modules/coya.nix
     ./modules/dev.nix
     ./modules/gpg-profiles.nix
+    ./modules/work.nix
   ];
 
   networking = {
     hostName = "nixos";
     extraHosts = "127.0.0.1 ${config.networking.hostName}";
-   nameservers = [ "130.255.73.90" "104.238.186.189" "185.121.177.177" "185.121.177.53" "50.116.40.226" ]; # OpenNIC DNS servers with DNSCrypt enabled
+    nameservers = [ "130.255.73.90" "104.238.186.189" "185.121.177.177" "185.121.177.53" "50.116.40.226" ]; # OpenNIC DNS servers with DNSCrypt enabled
     networkmanager = {
       enable = true;
       insertNameservers = config.networking.nameservers;
@@ -90,12 +89,12 @@ with (import ./lib.nix);
     aspellDicts.de
     aspellDicts.en
     aspellDicts.pl
-    base16-builder
     bindfs
     blueman
     calibre
     desktop_utils.i3-lock-screen
     desktop_utils.i3-merge-configs
+    dmidecode
     dropbox
     dunst
     exiv2
@@ -103,7 +102,10 @@ with (import ./lib.nix);
     firefox
     ghostscript
     gimp-with-plugins
+    go-mtpfs
+    unstable.gopass
     gtk-engine-murrine
+    hdparm
     i3lock
     i3status
     imagemagick
@@ -123,8 +125,6 @@ with (import ./lib.nix);
     numix-gtk-theme
     numix-icon-theme
     numix-icon-theme-circle
-    pass
-    pass-otp
     pavucontrol
     pdftk
     rofi
@@ -134,12 +134,16 @@ with (import ./lib.nix);
     tomb
     unrar
     upower
+    xdotool
     xsel
     xss-lock
+    xzoom
     zathura
   ];
   
   programs.ssh.startAgent = false;
+
+  programs.browserpass.enable = true;
   
   services.pcscd.enable = true;
 

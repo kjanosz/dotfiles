@@ -59,7 +59,6 @@
     lsof
     ltrace
     mkpasswd
-    nix-repl
     oh-my-zsh
     pciutils
     pcsctools
@@ -74,5 +73,5 @@
     zip
   ];
 
-  system.stateVersion = "18.03";
+  system.stateVersion = "18.09";
 }

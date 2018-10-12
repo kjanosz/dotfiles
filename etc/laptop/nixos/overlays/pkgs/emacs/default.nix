@@ -1,16 +1,16 @@
 { pkgs, ... }:
 
 let
-  # 2018-04-22T12:37:22+02:00
+  # 2018-09-27T17:45:38-04:00
   proofgeneral = pkgs.emacsPackages.proofgeneral_HEAD.overrideAttrs (oldAttrs: rec {
     name = "proof-general-${version}";
-    version = "7379232";
+    version = "HEAD";
 
     src = pkgs.fetchFromGitHub {
       owner = "ProofGeneral";
       repo = "PG";
-      rev = "73792323172e289b531afc086d3f97323b28ecb6";
-      sha256 = "15kxzbsqa5rb2z3yvjlngz5y4z6vr5gca3npdz75awxwiblajz86";
+      rev = "5b7b84bc5b44fd87905b16a67367ece4e7fa7ee3";
+      sha256 = "0bndhy7zz0rbcf3v0hb800678y4c0nna2a69m4mi4pch6ygyywn3";
     };
   });
 

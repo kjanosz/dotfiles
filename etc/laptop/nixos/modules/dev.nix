@@ -11,23 +11,26 @@ let
       exec ${pkgs.emacs}/bin/emacsclient --alternate-editor ${pkgs.emacs}/bin/emacs "$@"
     fi
   '';
+
+  summonWithGopass = pkgs.summon.withPlugins { providers = [ pkgs.gopass ]; };
 in
 {
   environment.systemPackages = with pkgs; [
     # general
-    bazel
-    dbeaver
-    docker_compose
-    insomnia
+    unstable.dbeaver
+    unstable.docker_compose
+    unstable.insomnia
+    summonWithGopass
     # toolchain
     ack
     ag
     gcc
+    gdb
     gnumake
     # ide
     editorScript
     emacs
-    idea.idea-community
+    unstable.idea.idea-community
     vscode
     # coq
     coq
@@ -71,8 +74,6 @@ in
   users.users.kj = {
     extraGroups = [ "adbusers" "docker" "vboxusers" ];
     packages = with pkgs; [
-      gopass
-      summon
       wireshark
     ];
   };  

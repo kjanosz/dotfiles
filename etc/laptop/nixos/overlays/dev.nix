@@ -3,15 +3,15 @@ self: super:
 with super.lib;
 
 let
-  # 2018-08-02T19:51:22+02:00
+  # 2018-09-06T17:09:51+02:00
   mozillaOverlays = configFromGitHubOf {  
     owner = "mozilla";
     repo = "nixpkgs-mozilla";
-    rev = "cf7bc3ac8c482461d9df1b799b80ee79911af85b";
-    sha256 = "09fqb1hiw82ymcdy18qkwvxddhqg2y3gyqki4crm2jb664yzvx3j";
+    rev = "136eacc0ceefa8fb44677799e5639e083606ee5d";
+    sha256 = "04bz093x3zjkzp7ba8mh876a1a34kp3jrys87m79gbln5qvcd2ir";
   };
 
-  # 2018-06-11T15:48:27+02:00
+  # 2018-07-21T20:31:03+01:00
   hie-nix = super.fetchFromGitHub {
     owner = "domenkozar";
     repo = "hie-nix";
@@ -22,37 +22,29 @@ in
 foldlExtensions [
   (import (mozillaOverlays + "/rust-overlay.nix"))
   
-  (self: super: {
-    ammonite2_11 = self.callPackage pkgs/ammonite { scala = "2.11"; };
+  (self: super: rec {
+    ammonite2_11 = super.callPackage pkgs/ammonite { scala = "2.11"; };
 
-    ammonite2_12 = self.callPackage pkgs/ammonite { scala = "2.12"; };
+    ammonite2_12 = super.callPackage pkgs/ammonite { scala = "2.12"; };
 
-    bazel = super.unstable.bazel;
-
-    dbeaver = super.unstable.dbeaver;
-
-    emacs = self.callPackage pkgs/emacs { pkgs = super.unstable; };
-
-    gopass = super.unstable.gopass;
+    emacs = super.callPackage pkgs/emacs { pkgs = super.unstable; };
 
     haskell-ide-engine = (import hie-nix { }).hies;
 
-    idea = super.unstable.idea;
-
-    insomnia = super.unstable.insomnia;
-
-    mill = self.callPackage pkgs/mill { };
+    mill = super.callPackage pkgs/mill { };
 
     rustChannels = {
-      stable = (super.rustChannelOf { date = "2018-08-02"; channel = "stable"; }).rust;
+      stable = (super.rustChannelOf { date = "2018-09-25"; channel = "stable"; }).rust;
 
-      beta = (super.rustChannelOf { date = "2018-08-01"; channel = "beta"; }).rust;
+      beta = (super.rustChannelOf { date = "2018-10-05"; channel = "beta"; }).rust;
 
-      nightly = (super.rustChannelOf { date = "2018-08-03"; channel = "nightly"; }).rust;
+      nightly = (super.rustChannelOf { date = "2018-10-07"; channel = "nightly"; }).rust;
     };
 
-    summon = self.callPackage pkgs/summon { };
+    summon = super.callPackage pkgs/summon { };
 
-    vscode = self.callPackage pkgs/vscode { pkgs = super.unstable; };
+    terraform-provider-vultr = super.callPackage pkgs/terraform-provider-vultr { };
+
+    vscode = super.callPackage pkgs/vscode { pkgs = super.unstable; };
   })
 ] self super

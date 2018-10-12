@@ -1,49 +1,85 @@
 #!/usr/bin/env bash
 
 if [ -z "$1" ]; then
-    echo 'No configuration provided'
+    echo 'No environment provided'
     exit 1
 fi
 
 declare -A ENVS
-ENVS[kjanosz.com]="nixos kjanosz.com"
-ENVS[kj.laptop]="nixos laptop kj.laptop"
-ENVS[kjw.laptop]="nixos laptop kjw.laptop"
+ENVS[kjanosz.com]="default nixos kjanosz.com"
+ENVS[kj.laptop]="default nixos laptop kj.laptop"
+ENVS[kjw.laptop]="default nixos laptop kjw.laptop"
 
 BASE=`dirname "$(readlink -f "$0")"`
-CONFIG=$1
-ENV="${2:-''}"
+ENV=$1
 
 GREEN='\033[0;32m'
 NC='\033[0m' # No Color
 
-link_files() {
-  find "$1" -type f -printf '%P\n' | while IFS= read -rd $'\n' file; do
-    path="$1/$file"
-    dir=`dirname "$path"`
+trap '
+  trap - INT # restore default INT handler
+  close_tomb()
+  kill -s INT "$$"
+' INT
 
-    mkdir -p "$HOME/`dirname $file`"
-    if [ ${file: -4} == ".gpg" ]; then # treat it as an encrypted file
-      file_dir=`dirname "$file"`
-      file_name=`basename "$file" .gpg`
-      echo "Decrypting $file"
-      gpg --no-verbose --quiet --batch --yes --output "$HOME/$file_dir/$file_name" --decrypt "$path"
-    else
-      echo "Linking $file"
-      ln -sf "$path" "$HOME/$file"
+open_tomb() {
+  echo -e "${GREEN}Opening tomb with secrets...${NC}"
+  tomb open "$BASE/secrets.tomb" "$BASE/secrets" -k "$BASE/secrets.gpg" -g
+}
+
+close_tomb() {
+  echo 
+  echo -e "${GREEN}Closing tomb with secrets...${NC}"
+  tomb slam secrets
+}
+
+link_files() {
+  DIR=$1
+  CONFIG=$2
+  MODE=$3
+
+  if [ -z "$CONFIG" ]; then
+    shopt -s nullglob
+    cs=("$DIR/"*)
+    shopt -u nullglob
+  else
+    cs=("$CONFIG")
+  fi
+
+  for c in "${cs[@]}"
+  do
+    c=$(basename $c)
+    if [ -d "$DIR/$c" ]; then
+      find "$DIR/$c" -type f -printf '%P\n' | while IFS= read -rd $'\n' file; do
+        path="$DIR/$c/$file"
+        dir=`dirname "$path"`
+
+        mkdir -p "$HOME/`dirname $file`"
+
+        if [[ -z "$MODE" ]]; then
+          echo "Linking $c/$file"
+          ln -sf "$path" "$HOME/$file"
+        else 
+          echo "Moving $c/$file"
+          cp -f --preserve=mode,timestamps "$path" "$HOME/$file"
+        fi
+      done
     fi
   done
 }
 
-echo -e "${GREEN}Linking default files...${NC}"
-link_files "$BASE/home/default/$CONFIG"
+# open tomb
+open_tomb
 
+# link files
 IFS=', ' read -r -a es <<< "${ENVS[$ENV]}"
 for e in "${es[@]}"
 do
-  if [ -d "$BASE/home/$e/$CONFIG" ]; then
-    echo 
-    echo -e "${GREEN}Linking $e files...${NC}"
-    link_files "$BASE/home/$e/$CONFIG"
-  fi
+  echo 
+  echo -e "${GREEN}Linking $e files...${NC}"
+  link_files "$BASE/home/$e" "$2"
+  link_files "$BASE/secrets/home/$e" "$2" true
 done
+
+# close tomb
+close_tomb

@@ -3,7 +3,7 @@
 buildGoPackage rec {
   name = "${pname}-${version}";
   pname = "chamber";
-  version = "2.0.0";
+  version = "2.2.0";
 
   goPackagePath = "github.com/segmentio/${pname}";
 
@@ -13,6 +13,6 @@ buildGoPackage rec {
     owner = "segmentio";
     repo = "${pname}";
     rev = "v${version}";
-    sha256 = "0y3p52lr59jsqavcgddms201xdbbphgzxx64khyq8mz12qalxry6";
+    sha256 = "0cb3ndqzfarnsfrpwsga06ynyd7myv6cm1l0mhmnmcmiwds3wbi5";
   };
 }  
