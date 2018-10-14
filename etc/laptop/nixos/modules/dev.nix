@@ -41,7 +41,7 @@ in
     haskell-ide-engine
     haskellPackages.structured-haskell-mode
     # idris
-    haskellPackages.idris
+    idris
     # rust
     rustChannels.stable
     rustfmt

@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+
+source lib.sh
+
+etc_envs
+set_trap
+
+sync_files() {
+  find "$1" -type f -printf '%P\n' | while IFS= read -rd $'\n' file; do
+    path="$1/$file"
+    dir=`dirname "$path"`
+    base="$2"
+
+    sudo mkdir -p "/$base/`dirname $file`"
+    echo "Moving $file"
+    sudo cp -f --preserve=mode,timestamps "$path" "/$base/$file"
+  done
+}
+
+# open tomb
+open_tomb
+
+# sync files
+IFS=', ' read -r -a es <<< "${ENVS[$ENV]}"
+for e in "${es[@]}"
+do
+  echo 
+  echo -e "${GREEN}Syncing $e files in etc...${NC}"
+  if [ -d "$BASE/etc/$e" ]; then
+    sync_files "$BASE/etc/$e" "etc"
+  fi
+  if [ -d "$BASE/secrets/etc/$e" ]; then
+    sync_files "$BASE/secrets/etc/$e" "etc"
+  fi
+
+  echo 
+  echo -e "${GREEN}Syncing $e files in var...${NC}"
+  if [ -d "$BASE/var/$e" ]; then
+    sync_files "$BASE/var/$e" "var"
+  fi
+  if [ -d "$BASE/secrets/var/$e" ]; then
+    sync_files "$BASE/secrets/var/$e" "var"
+  fi
+done
+
+# close tomb
+close_tomb

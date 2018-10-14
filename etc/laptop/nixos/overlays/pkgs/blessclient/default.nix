@@ -25,7 +25,7 @@ python27Packages.buildPythonApplication rec {
   src = fetchFromGitHub {
     owner = "lyft";
     repo = "python-blessclient";
-    rev = "0bdv9b8l62njl39wn3wyhwqsfph0c7sjdjsb8k2aqw94a7zkd2gr";
-    sha256 = "";
+    rev = "6442227fd3a04d2f996e78e3ac135ac9c3c429d4";
+    sha256 = "0bdv9b8l62njl39wn3wyhwqsfph0c7sjdjsb8k2aqw94a7zkd2gr";
   };
 }

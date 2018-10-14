@@ -62,6 +62,10 @@ with (import ./lib.nix);
   nix = {
     buildCores = 8;
     maxJobs = 8;
+    extraOptions = ''
+      keep-derivations = true
+      keep-outputs = true
+    '';
   };  
   
   nixpkgs = {
@@ -91,6 +95,7 @@ with (import ./lib.nix);
     aspellDicts.pl
     bindfs
     blueman
+    brainworkshop
     calibre
     desktop_utils.i3-lock-screen
     desktop_utils.i3-merge-configs
@@ -121,6 +126,7 @@ with (import ./lib.nix);
     mpv
     ncmpcpp
     networkmanagerapplet
+    nix-prefetch-github
     nix-prefetch-scripts
     numix-gtk-theme
     numix-icon-theme

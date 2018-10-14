@@ -1,37 +1,9 @@
 #!/usr/bin/env bash
 
-if [ -z "$1" ]; then
-    echo 'No environment provided'
-    exit 1
-fi
+source lib.sh
 
-declare -A ENVS
-ENVS[kjanosz.com]="default nixos kjanosz.com"
-ENVS[kj.laptop]="default nixos laptop kj.laptop"
-ENVS[kjw.laptop]="default nixos laptop kjw.laptop"
-
-BASE=`dirname "$(readlink -f "$0")"`
-ENV=$1
-
-GREEN='\033[0;32m'
-NC='\033[0m' # No Color
-
-trap '
-  trap - INT # restore default INT handler
-  close_tomb()
-  kill -s INT "$$"
-' INT
-
-open_tomb() {
-  echo -e "${GREEN}Opening tomb with secrets...${NC}"
-  tomb open "$BASE/secrets.tomb" "$BASE/secrets" -k "$BASE/secrets.gpg" -g
-}
-
-close_tomb() {
-  echo 
-  echo -e "${GREEN}Closing tomb with secrets...${NC}"
-  tomb slam secrets
-}
+home_envs
+set_trap
 
 link_files() {
   DIR=$1

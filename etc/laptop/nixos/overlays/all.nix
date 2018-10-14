@@ -18,6 +18,8 @@ foldlExtensions [
   })
 
   (self: super: {
+    brainworkshop = super.callPackage ./pkgs/brainworkshop { };
+
     browserpass = super.unstable.browserpass;
 
     calibre = super.calibre.overrideAttrs (oldAttrs: {
