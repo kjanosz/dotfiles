@@ -54,7 +54,7 @@ vscode-with-extensions.override {
       name = "vscode-pull-request-github";
       publisher = "GitHub";
       version = "0.2.1";
-      sha256 = "1zxrrdbwx665ki975wffg5vv6hza4k2lx64rq81xj61xm6zxrb07";
+      sha256 = "02f1fxnz2qa5vqvdr7cq0ggfqsfnindhgi8j9031nf94csvjlx8g";
     }
 
     # coq

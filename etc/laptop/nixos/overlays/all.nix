@@ -10,10 +10,10 @@ foldlExtensions [
   })
 
   (self: super: {  
-    # 2018-10-04T16:33:36+02:00
+    # 2018-10-16T10:33:58+01:00
     unstable = nixpkgsOf {
-      rev = "0a7e258012b60cbe530a756f09a4f2516786d370";
-      sha256 = "1qcnxkqkw7bffyc17mqifcwjfqwbvn0vs0xgxnjvh9w0ssl2s036";
+      rev = "45a419ab5a23c93421c18f3d9cde015ded22e712";
+      sha256 = "00mpq5p351xsk0p682xjggw17qgd079i45yj0aa6awawpckfx37s";
     };
   })
 

@@ -14,9 +14,15 @@ with (import ./lib.nix);
   networking = {
     hostName = "nixos";
     extraHosts = "127.0.0.1 ${config.networking.hostName}";
-    nameservers = [ "130.255.73.90" "104.238.186.189" "185.121.177.177" "185.121.177.53" "50.116.40.226" ]; # OpenNIC DNS servers with DNSCrypt enabled
+    nameservers = [ # OpenNIC DNS servers with DNSCrypt enabled
+      "185.121.177.177" "2a05:dfc7:5::53" # Worldwide
+      "169.239.202.202" "2a05:dfc7:5353::53" # Worldwide
+      "5.189.170.196" "2a02:c207:2008:2520:53::1" # DE
+      "146.185.176.36" "2a03:b0c0:0:1010::1a7:c001" # NL
+    ]; 
     networkmanager = {
       enable = true;
+      dns = "none";
       insertNameservers = config.networking.nameservers;
     };
   };
@@ -95,8 +101,8 @@ with (import ./lib.nix);
     aspellDicts.pl
     bindfs
     blueman
-    brainworkshop
     calibre
+    chromium
     desktop_utils.i3-lock-screen
     desktop_utils.i3-merge-configs
     dmidecode
@@ -116,7 +122,6 @@ with (import ./lib.nix);
     imagemagick
     imgurbash2
     inkscape
-    keepassx2
     keybase
     keybase-gui
     libnotify
@@ -259,23 +264,6 @@ with (import ./lib.nix);
     };
   };
 
-  systemd.services.passshare = {
-    wantedBy = [ "user-10000.slice" ];
-    partOf = [ "user-10000.slice" ];
-
-    path = [ pkgs.bindfs pkgs.utillinux ];
-    preStart = "mkdir -p ${config.users.users.kjw.home}/.pass";
-    serviceConfig = {
-      Type = "oneshot";
-      RemainAfterExit = "yes";
-      ExecStart = ''
-        ${pkgs.bindfs}/bin/bindfs -u kj -g users -M kjw -p 0600,u+D \
-          ${config.users.users.kj.home}/.pass ${config.users.users.kjw.home}/.pass
-      '';
-      ExecStop = "${pkgs.utillinux}/bin/umount ${config.users.users.kjw.home}/.pass";
-    };
-  };
-
   users.users.kj = {
     passwordFile = "/var/lib/users/kj.password";
     uid = 1000;
@@ -283,7 +271,7 @@ with (import ./lib.nix);
     home = "/home/kj";
     description = "Krzysztof Janosz";
     extraGroups = [ "networkmanager" "wheel" ];
-    packages = with pkgs; [ hledger hledger-web chromium thunderbird wine winetricks gnugo qgo stockfish scid ];
+    packages = with pkgs; [ hledger thunderbird wine winetricks gnugo stockfish scid ];
   };
 
   users.users.kjw = {
@@ -293,7 +281,7 @@ with (import ./lib.nix);
     home = "/home/kjw";
     description = "Krzysztof Janosz (Work)";
     extraGroups = [ "networkmanager" ];
-    packages = with pkgs; [ chromium ];
+    packages = with pkgs; [ ];
   };
 
   # Ledger Nano S
