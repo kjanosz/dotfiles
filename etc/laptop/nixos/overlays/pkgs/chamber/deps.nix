@@ -62,4 +62,31 @@
       sha256 = "13mhx4i913jil32j295m3a36jzvq1y64xig0naadiz7q9ja011r2";
     };
   }
+  {
+    goPackagePath = "github.com/segmentio/backo-go";
+    fetch = {
+      type = "git";
+      url = "https://github.com/segmentio/backo-go";
+      rev = "204274ad699c0983a70203a566887f17a717fef4";
+      sha256 = "0nhpqlhaag535d0vqydwhnx4dyn5d8329h5w9mnwkbbrhvnd8y4x";
+    };
+  }
+  {
+    goPackagePath = "github.com/xtgo/uuid";
+    fetch = {
+      type = "git";
+      url = "https://github.com/xtgo/uuid";
+      rev = "a0b114877d4caeffbd7f87e3757c17fce570fea7";
+      sha256 = "10pmay90is5x8cv5ckcajw3s7g2rpk4ix6kl4qhq8qx05x2ivlrw";
+    };
+  }
+  {
+    goPackagePath = "gopkg.in/segmentio/analytics-go.v3";
+    fetch = {
+      type = "git";
+      url = "https://github.com/segmentio/analytics-go";
+      rev = "1178b964a36694a8f9c161b19e6fe28cb37e8482";
+      sha256 = "1br026ivmgxb68l0d2bnbdqvc13qmh01bk5n559r0xi6mx3j4yl7";
+    };
+  }
 ]

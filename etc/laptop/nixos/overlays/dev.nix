@@ -3,12 +3,12 @@ self: super:
 with super.lib;
 
 let
-  # 2018-09-06T17:09:51+02:00
+  # 2018-10-30T22:11:41-04:00
   mozillaOverlays = configFromGitHubOf {  
     owner = "mozilla";
     repo = "nixpkgs-mozilla";
-    rev = "136eacc0ceefa8fb44677799e5639e083606ee5d";
-    sha256 = "04bz093x3zjkzp7ba8mh876a1a34kp3jrys87m79gbln5qvcd2ir";
+    rev = "0d64cf67dfac2ec74b2951a4ba0141bc3e5513e8";
+    sha256 = "0ngj2rk898rq73rq2rkwjax9p34mjlh3arj8w9npwwd6ljncarmh";
   };
 
   # 2018-07-21T20:31:03+01:00
@@ -34,11 +34,11 @@ foldlExtensions [
     mill = super.callPackage pkgs/mill { };
 
     rustChannels = {
-      stable = (super.rustChannelOf { date = "2018-09-25"; channel = "stable"; }).rust;
+      stable = (super.rustChannelOf { date = "2018-11-08"; channel = "stable"; }).rust;
 
-      beta = (super.rustChannelOf { date = "2018-10-05"; channel = "beta"; }).rust;
+      beta = (super.rustChannelOf { date = "2018-11-09"; channel = "beta"; }).rust;
 
-      nightly = (super.rustChannelOf { date = "2018-10-07"; channel = "nightly"; }).rust;
+      nightly = (super.rustChannelOf { date = "2018-11-10"; channel = "nightly"; }).rust;
     };
 
     summon = super.callPackage pkgs/summon { };

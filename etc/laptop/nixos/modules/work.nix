@@ -9,14 +9,16 @@ with lib;
       ansible
       awscli
       aws-vault
-      docker_compose
+      chamber
       clojure
+      docker_compose
       leiningen
       mysql57
       nailgun
       nodejs
       packer
       slack
+      summon-aws-secrets
       terraform
     ];
   };

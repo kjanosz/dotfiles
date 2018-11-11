@@ -10,16 +10,14 @@ foldlExtensions [
   })
 
   (self: super: {  
-    # 2018-10-16T10:33:58+01:00
+    # 2018-11-07T00:05:22+01:00
     unstable = nixpkgsOf {
-      rev = "45a419ab5a23c93421c18f3d9cde015ded22e712";
-      sha256 = "00mpq5p351xsk0p682xjggw17qgd079i45yj0aa6awawpckfx37s";
+      rev = "6141939d6e0a77c84905efd560c03c3032164ef1";
+      sha256 = "1nz2z71qvjna8ki5jq4kl6pnl716hj66a0gs49l18q24pj2kbjwh";
     };
   })
 
   (self: super: {
-    brainworkshop = super.callPackage ./pkgs/brainworkshop { };
-
     browserpass = super.unstable.browserpass;
 
     calibre = super.calibre.overrideAttrs (oldAttrs: {

@@ -63,14 +63,14 @@ let
 
   precommit = python27.pkgs.buildPythonApplication rec {
     pname = "pre_commit";
-    version = "1.11.2";
+    version = "1.12.0";
     name = "${pname}-${version}";
 
     pythonPath = with python27Packages; [ aspy_yaml cfgv cached-property identify nodeenv six pyyaml virtualenv  ];
 
     src = python27.pkgs.fetchPypi {
       inherit pname version;
-      sha256 = "1fvbmnz9p2s36r6llmdpimq7h9ssgyx4f2gkkx505yx978b54d42";
+      sha256 = "87f687da6a2651d5067cfec95b854b004e95b70143cbf2369604bb3acbce25ec";
     };
   };
 in

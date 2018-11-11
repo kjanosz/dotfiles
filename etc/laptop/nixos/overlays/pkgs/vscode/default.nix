@@ -14,20 +14,20 @@ vscode-with-extensions.override {
     {
       name = "code-runner";
       publisher = "formulahendry";
-      version = "0.9.4";
-      sha256 = "08qq21gaa7igklv9si35qxhs79na893vyp96hf7rvyv7c4fn1pvw";
+      version = "0.9.5";
+      sha256 = "0z6pfh21dzwcv81dcsi4v6x71fxl6aalnhbj033w4zs4sxryzjq8";
     }
     {
       name = "project-manager";
       publisher = "alefragnani";
-      version = "9.0.1";
-      sha256 = "0aqyavgpaqvv62q15h4dkxcgj4khsgr1rlzr3wi9aflyncg7addb";
+      version = "9.1.0";
+      sha256 = "0z525nln4gr3may1mm9agxmvvlrl7118x40s2pj9l0df3l02j51z";
     }
     {
       name = "markdown-all-in-one";
       publisher = "yzhang";
-      version = "1.6.2";
-      sha256 = "0pcznxlf2vz6625y0p36shzhj6w5wnqnc25iwksl88pxxn04h01v";
+      version = "1.7.0";
+      sha256 = "15606y2ci79i7sw2j3w14zlxs23w4y4y7c552ah9fmhrjmzmv44y";
     }
     {
       name = "open-in-browser";
@@ -53,8 +53,8 @@ vscode-with-extensions.override {
     {
       name = "vscode-pull-request-github";
       publisher = "GitHub";
-      version = "0.2.1";
-      sha256 = "02f1fxnz2qa5vqvdr7cq0ggfqsfnindhgi8j9031nf94csvjlx8g";
+      version = "0.2.3";
+      sha256 = "02cc1wzaairsvfam5hrg329l3qh5087sgfn6gm1wfl9zm3dybcyr";
     }
 
     # coq
@@ -95,14 +95,14 @@ vscode-with-extensions.override {
     {
       name = "java"; 
       publisher = "redhat";
-      version = "0.32.0";
-      sha256 = "0agwvwrjzfv2fnkfpgybzgalq5skbj8smxpbjh44ys8187p0j2wq";
+      version = "0.33.0";
+      sha256 = "0fgy34iwdckdkhvhxx19v07cy7501950i69dkgb432dr361cyg99";
     }
     {
       name = "vscode-java-debug"; 
       publisher = "vscjava";
-      version = "0.13.0";
-      sha256 = "11xvd1b0qsvrbm4yb0c7fm537p1gs6wz45xzl6v1a7k08dapi20i";
+      version = "0.15.0";
+      sha256 = "1p0jf3jf7smf0xxbbzjfj4kg3dq6wxdwilk5b5c7kjd24il210b4";
     }
     # nix
     {
@@ -128,8 +128,8 @@ vscode-with-extensions.override {
     {
       name = "plantuml"; 
       publisher = "jebbs";
-      version = "2.9.4";
-      sha256 = "1aiy59x0h7xsclbgar3vglr20wm9kgnnqfq20nbabfndnww502nx";
+      version = "2.9.8";
+      sha256 = "0zbhlwj1hnr38wbhlap2pvjl7kh4rinp4jp150lwi4rqi6b954vw";
     }
     # python
     {
@@ -147,8 +147,8 @@ vscode-with-extensions.override {
     {
       name = "python"; 
       publisher = "ms-python";
-      version = "2018.7.1";
-      sha256 = "0db0f2gkwgc1zwp1jn7xr1jksgsq7j1vcv5125zgglvpr7k148jf";
+      version = "2018.10.1";
+      sha256 = "1j9nf09v31lmrjkxf7p1d78d064x6afzh0dvssmk3sjm2c5r432k";
     }
     # rust
     {

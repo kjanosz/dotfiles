@@ -271,7 +271,7 @@ with (import ./lib.nix);
     home = "/home/kj";
     description = "Krzysztof Janosz";
     extraGroups = [ "networkmanager" "wheel" ];
-    packages = with pkgs; [ hledger thunderbird wine winetricks gnugo stockfish scid ];
+    packages = with pkgs; [ cabextract hledger thunderbird wine winetricks gnugo stockfish scid ];
   };
 
   users.users.kjw = {
