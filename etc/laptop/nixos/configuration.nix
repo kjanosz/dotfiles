@@ -14,17 +14,7 @@ with (import ./lib.nix);
   networking = {
     hostName = "nixos";
     extraHosts = "127.0.0.1 ${config.networking.hostName}";
-    nameservers = [ # OpenNIC DNS servers with DNSCrypt enabled
-      "185.121.177.177" "2a05:dfc7:5::53" # Worldwide
-      "169.239.202.202" "2a05:dfc7:5353::53" # Worldwide
-      "5.189.170.196" "2a02:c207:2008:2520:53::1" # DE
-      "146.185.176.36" "2a03:b0c0:0:1010::1a7:c001" # NL
-    ]; 
-    networkmanager = {
-      enable = true;
-      dns = "none";
-      insertNameservers = config.networking.nameservers;
-    };
+    networkmanager.enable = true;
   };
 
   hardware.bluetooth = {
@@ -75,7 +65,12 @@ with (import ./lib.nix);
   };  
   
   nixpkgs = {
-    config.allowUnfree = true;
+    config = {
+      allowUnfree = true;
+      chromium = {
+        enableWideVine = true;
+      };
+    };
     overlays = [ (import ./overlays) ];
   };  
 
@@ -101,19 +96,20 @@ with (import ./lib.nix);
     aspellDicts.pl
     bindfs
     blueman
+    unstable.browserpass
     calibre
-    chromium
+    unstable.chromium
     desktop_utils.i3-lock-screen
     desktop_utils.i3-merge-configs
     dmidecode
-    dropbox
     dunst
     exiv2
     feh
-    firefox
+    unstable.firefox-unwrapped
     ghostscript
     gimp-with-plugins
     go-mtpfs
+    google-chrome
     unstable.gopass
     gtk-engine-murrine
     hdparm
@@ -122,8 +118,8 @@ with (import ./lib.nix);
     imagemagick
     imgurbash2
     inkscape
-    keybase
-    keybase-gui
+    unstable.keybase
+    unstable.keybase-gui
     libnotify
     libreoffice
     lightdm
@@ -150,6 +146,22 @@ with (import ./lib.nix);
     xss-lock
     xzoom
     zathura
+  ];
+
+  security.sudo.extraRules = [
+    {
+      groups = [ "wheel" ];
+      commands = [
+        {
+          command = "/run/current-system/sw/bin/nixos-rebuild";
+          options = [ "NOPASSWD" ];
+        }
+        {
+          command = "/run/current-system/sw/bin/nix-collect-garbage";
+          options = [ "NOPASSWD" ];
+        }
+      ];
+    }
   ];
   
   programs.ssh.startAgent = false;
@@ -271,7 +283,7 @@ with (import ./lib.nix);
     home = "/home/kj";
     description = "Krzysztof Janosz";
     extraGroups = [ "networkmanager" "wheel" ];
-    packages = with pkgs; [ cabextract hledger thunderbird wine winetricks gnugo stockfish scid ];
+    packages = with pkgs; [ cabextract hledger thunderbird wine winetricks ];
   };
 
   users.users.kjw = {

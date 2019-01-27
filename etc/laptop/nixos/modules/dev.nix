@@ -17,9 +17,9 @@ in
 {
   environment.systemPackages = with pkgs; [
     # general
-    unstable.dbeaver
-    unstable.docker_compose
-    unstable.insomnia
+    dbeaver
+    docker_compose
+    insomnia
     summonWithGopass
     # toolchain
     ack
@@ -39,13 +39,26 @@ in
     cabal-install
     ghc
     haskell-ide-engine
-    haskellPackages.structured-haskell-mode
+    haskellPackages.apply-refact
+    haskellPackages.brittany
+    # haskellPackages.HaRe
     # idris
     idris
+    # julia & python
+    julia_10
+    python36Packages.jupyter_core
+    python36Packages.jupyter_client
+    python
+    # purescript
+    #unstable.purescript
+    # racket
+    racket
     # rust
+    carnix
     rustChannels.stable
     rustfmt
     rustracer
+    rustup
     # scala & JVM
     ammonite2_11
     ammonite2_12
@@ -55,10 +68,6 @@ in
     sbt
     scala
     visualvm
-    # python
-    python
-    # racket
-    racket
   ];
 
   environment.variables = {

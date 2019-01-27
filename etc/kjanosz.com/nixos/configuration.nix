@@ -4,7 +4,7 @@
   imports = [
     ./common.nix
     ./hardware-configuration.nix
-    ./monitoring.nix
+    #./monitoring.nix
     ./web.nix
   ];
 

@@ -3,20 +3,20 @@ self: super:
 with super.lib;
 
 let
-  # 2018-10-30T22:11:41-04:00
+  # 2019-01-25T17:40:39+01:00
   mozillaOverlays = configFromGitHubOf {  
     owner = "mozilla";
     repo = "nixpkgs-mozilla";
-    rev = "0d64cf67dfac2ec74b2951a4ba0141bc3e5513e8";
-    sha256 = "0ngj2rk898rq73rq2rkwjax9p34mjlh3arj8w9npwwd6ljncarmh";
+    rev = "507efc7f62427ded829b770a06dd0e30db0a24fe";
+    sha256 = "17p1krbs6x6rnz59g46rja56b38gcigri3h3x9ikd34cxw77wgs9";
   };
 
-  # 2018-07-21T20:31:03+01:00
+  # 2019-01-02T17:40:22+00:00
   hie-nix = super.fetchFromGitHub {
     owner = "domenkozar";
     repo = "hie-nix";
-    rev = "e3113da93b479bec3046e67c0123860732335dd9";
-    sha256 = "05rkzjvzywsg66iafm84xgjlkf27yfbagrdcb8sc9fd59hrzyiqk";
+    rev = "19f47e0bf2e2f1a793bf87d64bf8266062f422b1";
+    sha256 = "1px146agwmsi0nznc1zd9zmhgjczz6zlb5yf21sp4mixzzbjsasq";
   };
 in
 foldlExtensions [
@@ -34,11 +34,11 @@ foldlExtensions [
     mill = super.callPackage pkgs/mill { };
 
     rustChannels = {
-      stable = (super.rustChannelOf { date = "2018-11-08"; channel = "stable"; }).rust;
+      stable = (super.rustChannelOf { date = "2019-01-17"; channel = "stable"; }).rust;
 
-      beta = (super.rustChannelOf { date = "2018-11-09"; channel = "beta"; }).rust;
+      beta = (super.rustChannelOf { date = "2019-01-25"; channel = "beta"; }).rust;
 
-      nightly = (super.rustChannelOf { date = "2018-11-10"; channel = "nightly"; }).rust;
+      nightly = (super.rustChannelOf { date = "2019-01-25"; channel = "nightly"; }).rust;
     };
 
     summon = super.callPackage pkgs/summon { };

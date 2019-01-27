@@ -1,1 +1,0 @@
-alias weechat='ssh -t kj@kjanosz.com docker exec -it im dtach -a /tmp/weechat'

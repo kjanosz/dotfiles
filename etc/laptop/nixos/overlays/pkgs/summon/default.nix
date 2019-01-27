@@ -6,6 +6,7 @@ rec {
   generic = buildGoPackage rec {
     name = "summon-${version}";
     version = "0.6.8";
+
     goPackagePath = "github.com/cyberark/summon";
 
     src = fetchFromGitHub {

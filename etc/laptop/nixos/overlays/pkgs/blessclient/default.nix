@@ -15,7 +15,7 @@ let
 
     doCheck = false;
   };
-in # 2018-10-04T07:24:39+10:00
+in # 2018-12-12T10:47:22-08:00
 python27Packages.buildPythonApplication rec {
   name = "blessclient-${version}";
   version = "HEAD";
@@ -25,7 +25,7 @@ python27Packages.buildPythonApplication rec {
   src = fetchFromGitHub {
     owner = "lyft";
     repo = "python-blessclient";
-    rev = "6442227fd3a04d2f996e78e3ac135ac9c3c429d4";
-    sha256 = "0bdv9b8l62njl39wn3wyhwqsfph0c7sjdjsb8k2aqw94a7zkd2gr";
+    rev = "a8a896c2285a2bfb6314b5c60f673b5812198ef7";
+    sha256 = "0blgaipyh6nabh6c2jhkyjbga847gn6zsrqrf59k6qj415rip322";
   };
 }

@@ -1,10 +1,6 @@
 self: super:
 
 {
-    chamber = super.callPackage ./pkgs/chamber { };
-
-    slack = super.unstable.slack;
-
     summon-aws-secrets = super.callPackage ./pkgs/summon-aws-secrets { };
 
     terraform = super.unstable.terraform.overrideAttrs (oldAttrs: rec {

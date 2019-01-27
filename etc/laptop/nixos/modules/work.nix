@@ -5,21 +5,21 @@ with lib;
 {
   users.users.kjw = {
     extraGroups = [ "docker" "vboxusers" ];
-    packages = with pkgs; with albacross; [
+    packages = with pkgs; [
       ansible
       awscli
       aws-vault
-      chamber
       clojure
-      docker_compose
+      unstable.flyway
+      go
       leiningen
       mysql57
       nailgun
       nodejs
-      packer
-      slack
-      summon-aws-secrets
-      terraform
+      unstable.packer
+      unstable.slack
+      albacross.summon-aws-secrets
+      albacross.terraform
     ];
   };
 }
