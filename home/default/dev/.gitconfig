@@ -4,3 +4,5 @@
   signingkey = janosz.krzysztof@gmail.com
 [commit]
   gpgsign = true
+[protocol "keybase"]
+	allow = always

@@ -28,6 +28,9 @@
 
 (use-package org
   :config
+  (require 'org-crypt)
+  (org-crypt-use-before-save-magic)
+  (setq org-crypt-key "janosz.krzysztof@gmail.com")
   (setq org-pandoc-options-for-beamer-pdf '((latex-engine . "xelatex"))
         org-pandoc-options-for-latex-pdf '((latex-engine . "xelatex")))
   (setq org-todo-keyword
@@ -38,6 +41,18 @@
         ("WAITING" . (:foreground "yellow" :weight bold))
         ("DONE" . (:foreground "green" :weight bold))
         ("CANCELLED" . (:foreground "gray" :weight bold)))))
+
+(use-package org-journal
+  :ensure t
+  :defer t
+  :config
+  (require 'org-crypt)
+  (org-crypt-use-before-save-magic)
+  (setq org-crypt-key "janosz.krzysztof@gmail.com")
+  :custom
+  (org-journal-dir "~/Documents/Journal/")
+  (org-journal-date-format "%A, %F")
+  (org-journal-encrypt-journal t))
 
 
 (provide 'init-text)

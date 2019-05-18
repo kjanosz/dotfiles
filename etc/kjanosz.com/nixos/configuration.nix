@@ -1,10 +1,12 @@
-{ config, pkgs, ... }:
+{ config, lib, pkgs, ... }:
 
 {
   imports = [
     ./common.nix
     ./hardware-configuration.nix
-    #./monitoring.nix
+    ./storage.nix
+    ./monitoring.nix
+    ./tasks.nix
     ./web.nix
   ];
 
@@ -17,6 +19,8 @@
   };
 
   time.timeZone = "Europe/Frankfurt";
+
+  nixpkgs.overlays = [ (import ./overlays) ];
 
   services.openssh = {
     enable = true;

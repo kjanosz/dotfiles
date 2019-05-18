@@ -41,6 +41,11 @@ in base.emacsWithPackages (epkgs: with epkgs; with epkgs.melpaPackages; [
   helm-ag
   helm-projectile
 
+  # coq
+  proofgeneral
+  coq-commenter
+  company-coq
+
   # haskell
   haskell-mode
   intero
@@ -54,10 +59,9 @@ in base.emacsWithPackages (epkgs: with epkgs; with epkgs.melpaPackages; [
   idris-mode
   helm-idris
 
-  # coq
-  proofgeneral
-  coq-commenter
-  company-coq
+  # lisp
+  geiser
+  slime
   
   # rust 
   cargo
@@ -71,9 +75,11 @@ in base.emacsWithPackages (epkgs: with epkgs; with epkgs.melpaPackages; [
   sbt-mode
   scala-mode
 
-  # other langs
+  # data science
   ein
-  geiser
+  julia-mode
+
+  # other langs
   web-mode
 
   # other
@@ -93,6 +99,7 @@ in base.emacsWithPackages (epkgs: with epkgs; with epkgs.melpaPackages; [
   ledger-mode
   markdown-mode
   org
+  org-journal
   pandoc-mode
   company-auctex
 ])

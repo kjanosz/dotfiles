@@ -9,11 +9,11 @@ foldlExtensions [
     lib = super.lib // ulib;
   })
 
-  (self: super: {  
-    # 2019-01-20T18:32:34+01:00
+  (self: super: {
+    # 2019-05-15T19:54:37-04:00
     unstable = nixpkgsOf {
-      rev = "bc41317e24317b0f506287f2d5bab00140b9b50e";
-      sha256 = "1skl7icprfdq9wj1nivqyhylimgq7vy950h2m1lpbz2xjb3dk15k";
+      rev = "bc9df0f66110039e495b6debe3a6cda4a1bb0fed";
+      sha256 = "0y2w259j0vqiwjhjvlbsaqnp1nl2zwz6sbwwhkrqn7k7fmhmxnq1";
     };
   })
 
@@ -23,6 +23,8 @@ foldlExtensions [
     });
 
     desktop_utils = super.callPackage ./pkgs/desktop_utils { };
+
+    mullvad = super.callPackage ./pkgs/mullvad { };
   })
 
   (self: super: foldlExtensions [

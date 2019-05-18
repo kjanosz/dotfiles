@@ -1,6 +1,6 @@
 { stdenv, fetchFromGitHub, pkgs
 , appConfig ? null
-, stateDir
+, stateDir ? "/var/www/kanboard"
 , plugins ? []
 }:
 

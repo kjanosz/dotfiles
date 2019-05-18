@@ -1,8 +1,10 @@
-{ fetchFromGitHub, buildGoPackage, ... }:
+{ fetchFromGitHub, buildGoPackage, pkgs, ... }:
 
 buildGoPackage rec {
   name = "prometheus-postgresql-adapter-${version}";
-  version = "0.4.1";
+  version = "HEAD";
+
+  buildInputs = with pkgs; [ dep ];
 
   goPackagePath = "github.com/timescale/prometheus-postgresql-adapter";
   goDeps = ./deps.nix;
@@ -10,7 +12,7 @@ buildGoPackage rec {
   src = fetchFromGitHub {
     owner = "timescale";
     repo = "prometheus-postgresql-adapter";
-    rev = "${version}";
-    sha256 = "0fflph6wsibs9ylp5m3v4l5bspn8mbxdaffvakzl3s1pj19q3g1x";
+    rev = "c857476921d4455c4756dd13714964c6c4d2c192";
+    sha256 = "0gg855c6vv8sq0y0s1jri9bz9gyzjj9nrd9v1098xif9z73mdva9";
   };
 }  

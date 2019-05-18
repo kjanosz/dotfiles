@@ -1,14 +1,13 @@
 { config, lib, pkgs, ... }:
 
-with (import ./lib.nix);
-
 {
   imports = [
     ./common.nix
     ./secrets.nix
-    ./modules/dev.nix
+    # ./modules/backup.nix
     ./modules/gpg-profiles.nix
-    ./modules/work.nix
+    ./dev.nix
+    ./work.nix
   ];
 
   networking = {
@@ -32,6 +31,10 @@ with (import ./lib.nix);
     extraConfig = ''
       load-module module-native-protocol-tcp auth-ip-acl=127.0.0.1
     '';
+  };
+
+  hardware.opengl = {
+    driSupport32Bit = true;
   };
 
   fonts = {
@@ -90,6 +93,7 @@ with (import ./lib.nix);
 
   environment.systemPackages = with pkgs; [
     acpi
+    appimage-run
     aspell
     aspellDicts.de
     aspellDicts.en
@@ -97,6 +101,7 @@ with (import ./lib.nix);
     bindfs
     blueman
     unstable.browserpass
+    cachix
     calibre
     unstable.chromium
     desktop_utils.i3-lock-screen
@@ -125,6 +130,7 @@ with (import ./lib.nix);
     lightdm
     lm_sensors
     mpv
+    mullvad
     ncmpcpp
     networkmanagerapplet
     nix-prefetch-github
@@ -132,8 +138,10 @@ with (import ./lib.nix);
     numix-gtk-theme
     numix-icon-theme
     numix-icon-theme-circle
+    pass # for protonmail-bridge
     pavucontrol
     pdftk
+    unstable.protonmail-bridge
     rofi
     rofi-pass
     termite
@@ -224,7 +232,7 @@ with (import ./lib.nix);
 
       scdaemon = ''
         deny-admin
-        reader-port "Yubico Yubikey 4 OTP+U2F+CCID"
+        reader-port "Yubico YubiKey OTP+FIDO+CCID"
         card-timeout 60
       '';
     };
@@ -283,7 +291,7 @@ with (import ./lib.nix);
     home = "/home/kj";
     description = "Krzysztof Janosz";
     extraGroups = [ "networkmanager" "wheel" ];
-    packages = with pkgs; [ cabextract hledger thunderbird wine winetricks ];
+    packages = with pkgs; [ cabextract hledger steam thunderbird unstable.playonlinux unstable.wine ];
   };
 
   users.users.kjw = {
@@ -295,24 +303,4 @@ with (import ./lib.nix);
     extraGroups = [ "networkmanager" ];
     packages = with pkgs; [ ];
   };
-
-  # Ledger Nano S
-  services.udev.extraRules = ''
-    SUBSYSTEMS=="usb", ATTRS{idVendor}=="2581", ATTRS{idProduct}=="1b7c", MODE="0660", GROUP="users"
-    SUBSYSTEMS=="usb", ATTRS{idVendor}=="2581", ATTRS{idProduct}=="2b7c", MODE="0660", GROUP="users"
-    SUBSYSTEMS=="usb", ATTRS{idVendor}=="2581", ATTRS{idProduct}=="3b7c", MODE="0660", GROUP="users"
-    SUBSYSTEMS=="usb", ATTRS{idVendor}=="2581", ATTRS{idProduct}=="4b7c", MODE="0660", GROUP="users"
-    SUBSYSTEMS=="usb", ATTRS{idVendor}=="2581", ATTRS{idProduct}=="1807", MODE="0660", GROUP="users"
-    SUBSYSTEMS=="usb", ATTRS{idVendor}=="2581", ATTRS{idProduct}=="1808", MODE="0660", GROUP="users"
-    SUBSYSTEMS=="usb", ATTRS{idVendor}=="2c97", ATTRS{idProduct}=="0000", MODE="0660", GROUP="users"
-    SUBSYSTEMS=="usb", ATTRS{idVendor}=="2c97", ATTRS{idProduct}=="0001", MODE="0660", GROUP="users"
-    SUBSYSTEMS=="usb", ATTRS{idVendor}=="2581", ATTRS{idProduct}=="1b7c", MODE="0660", TAG+="uaccess", TAG+="udev-acl"
-    SUBSYSTEMS=="usb", ATTRS{idVendor}=="2581", ATTRS{idProduct}=="2b7c", MODE="0660", TAG+="uaccess", TAG+="udev-acl"
-    SUBSYSTEMS=="usb", ATTRS{idVendor}=="2581", ATTRS{idProduct}=="3b7c", MODE="0660", TAG+="uaccess", TAG+="udev-acl"
-    SUBSYSTEMS=="usb", ATTRS{idVendor}=="2581", ATTRS{idProduct}=="4b7c", MODE="0660", TAG+="uaccess", TAG+="udev-acl"
-    SUBSYSTEMS=="usb", ATTRS{idVendor}=="2581", ATTRS{idProduct}=="1807", MODE="0660", TAG+="uaccess", TAG+="udev-acl"
-    SUBSYSTEMS=="usb", ATTRS{idVendor}=="2581", ATTRS{idProduct}=="1808", MODE="0660", TAG+="uaccess", TAG+="udev-acl"
-    SUBSYSTEMS=="usb", ATTRS{idVendor}=="2c97", ATTRS{idProduct}=="0000", MODE="0660", TAG+="uaccess", TAG+="udev-acl"
-    SUBSYSTEMS=="usb", ATTRS{idVendor}=="2c97", ATTRS{idProduct}=="0001", MODE="0660", TAG+="uaccess", TAG+="udev-acl"
-  '';
 }

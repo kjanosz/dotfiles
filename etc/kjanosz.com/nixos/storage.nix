@@ -4,7 +4,7 @@ with pkgs;
 with lib;
 
 let
-  cfg = services.postgresql.init;
+  cfg = config.services.postgresql.init;
 in
 {
   options = {
@@ -41,6 +41,9 @@ in
 
     services.redis = {
       enable = true;
+      bind = "127.0.0.1";
+      port = 6379;
+      unixSocket = "${config.services.redis.dbpath}/redis.sock";
     };
   };
 }

@@ -1,9 +1,3 @@
 self: super:
 
-{
-  kanboard = super.callPackage ./pkgs/kanboard { };
-
-  kanboardPlugins = import ./pkgs/kanboard/plugins;
-
-  prometheus-postgresql-adapter = super.callPackage ./pkgs/prometheus-postgresql-adapter { };
-}
+import ./all.nix { ulib = (import ../lib.nix super); } self super

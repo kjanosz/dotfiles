@@ -3,20 +3,20 @@ self: super:
 with super.lib;
 
 let
-  # 2019-01-25T17:40:39+01:00
+  # 2019-04-02T09:39:52+02:00
   mozillaOverlays = configFromGitHubOf {  
     owner = "mozilla";
     repo = "nixpkgs-mozilla";
-    rev = "507efc7f62427ded829b770a06dd0e30db0a24fe";
-    sha256 = "17p1krbs6x6rnz59g46rja56b38gcigri3h3x9ikd34cxw77wgs9";
+    rev = "50bae918794d3c283aeb335b209efd71e75e3954";
+    sha256 = "07b7hgq5awhddcii88y43d38lncqq9c8b2px4p93r5l7z0phv89d";
   };
 
-  # 2019-01-02T17:40:22+00:00
-  hie-nix = super.fetchFromGitHub {
-    owner = "domenkozar";
-    repo = "hie-nix";
-    rev = "19f47e0bf2e2f1a793bf87d64bf8266062f422b1";
-    sha256 = "1px146agwmsi0nznc1zd9zmhgjczz6zlb5yf21sp4mixzzbjsasq";
+  # 2019-05-15T23:52:25+02:00
+  hies = super.fetchFromGitHub {
+    owner = "Infinisil";
+    repo = "all-hies";
+    rev = "777b6665c1671feaa3c3eb74d10dd6f79ec1302c";
+    sha256 = "03py0j4d6asrxmp1170n5sywsa2y1pw0xr51r2f1digfg5ryrw98";
   };
 in
 foldlExtensions [
@@ -29,16 +29,16 @@ foldlExtensions [
 
     emacs = super.callPackage pkgs/emacs { pkgs = super.unstable; };
 
-    haskell-ide-engine = (import hie-nix { }).hies;
+    haskell-ide-engine = (import hies{ }).selection { selector = p: { inherit (p) ghc864 ghc844 ghc822; }; };
 
     mill = super.callPackage pkgs/mill { };
 
     rustChannels = {
-      stable = (super.rustChannelOf { date = "2019-01-17"; channel = "stable"; }).rust;
+      stable = (super.rustChannelOf { date = "2019-05-14"; channel = "stable"; }).rust;
 
-      beta = (super.rustChannelOf { date = "2019-01-25"; channel = "beta"; }).rust;
+      beta = (super.rustChannelOf { date = "2019-05-17"; channel = "beta"; }).rust;
 
-      nightly = (super.rustChannelOf { date = "2019-01-25"; channel = "nightly"; }).rust;
+      nightly = (super.rustChannelOf { date = "2019-05-18"; channel = "nightly"; }).rust;
     };
 
     summon = super.callPackage pkgs/summon { };

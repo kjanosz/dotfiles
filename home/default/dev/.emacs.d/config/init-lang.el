@@ -25,6 +25,10 @@
   (add-hook 'coq-mode-hook 'coq-commenter-mode)
   (add-hook 'coq-mode-hook #'company-coq-mode))
 
+(use-package julia-mode
+  :mode "\\.jl\\'"
+  :interpreter "julia")
+
 (use-package python-mode
   :mode "\\.py\\'"
   :interpreter "python"
@@ -59,6 +63,8 @@
   :config
   (use-package ensime)
   (use-package sbt-mode))
+
+(use-package slime)  
 
 (use-package geiser
   :config

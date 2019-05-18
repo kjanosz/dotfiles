@@ -5,10 +5,17 @@ with lib;
 
 let
   domain = "${config.networking.hostName}";
-  smtp = (import secrets.nix).smtp;
+  secrets = import ./secrets.nix;
 in
 {
+  imports = [
+    ./modules/beanstalkd.nix
+    ./modules/kanboard.nix
+  ];
+
   config = {
+    services.beanstalkd.enable = true;
+
     services.kanboard = {
       enable = true;
       subdomain = "tasks";
@@ -23,12 +30,12 @@ in
 
         define('MAIL_CONFIGURATION', false);
         define('MAIL_TRANSPORT', 'smtp');
-        define('MAIL_SMTP_HOSTNAME', '${smtp.host}');
-        define('MAIL_SMTP_PORT', ${smtp.port});
-        define('MAIL_SMTP_USERNAME', '${smtp.user}');
-        define('MAIL_SMTP_PASSWORD', '${smtp.password}');
+        define('MAIL_SMTP_HOSTNAME', '${secrets.smtp.host}');
+        define('MAIL_SMTP_PORT', ${secrets.smtp.port});
+        define('MAIL_SMTP_USERNAME', '${secrets.smtp.user}');
+        define('MAIL_SMTP_PASSWORD', '${secrets.smtp.password}');
         define('MAIL_SMTP_ENCRYPTION', 'tls');
-        define('MAIL_FROM', 'tasks@${domain});
+        define('MAIL_FROM', 'tasks@${domain}');
         
         define('BRUTEFORCE_CAPTCHA', 3);
         define('BRUTEFORCE_LOCKDOWN', 10);
