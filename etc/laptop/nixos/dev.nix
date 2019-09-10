@@ -14,9 +14,8 @@ let
 
   summonWithGopass = pkgs.summon.withPlugins { providers = [ pkgs.gopass ]; };
 
-  pythonDS = pkgs.python3.withPackages (ps: with ps; [ 
-    jupyter_core jupyter_client jupyterlab jupyterlab_launcher notebook
-    ipython ipykernel matplotlib nltk numpy pandas scipy scikitlearn
+  pythonEnv = pkgs.python3.withPackages (ps: with ps; [ 
+    jupyter_core jupyter_client jupyterlab jupyterlab_launcher notebook ipython ipykernel
   ]);
 in
 {
@@ -37,21 +36,22 @@ in
     emacs
     unstable.idea.idea-community
     vscode
-    # coq
-    coq
     # haskell
     cabal2nix
     cabal-install
     ghc
     haskell-ide-engine
-    haskellPackages.apply-refact
-    # haskellPackages.brittany
-    # haskellPackages.HaRe
+    unstable.haskellPackages.apply-refact
+    unstable.haskellPackages.brittany
+    # unstable.haskellPackages.HaRe
     # idris
     idris
     # lisp
-    acl2
     racket
+    # proof
+    acl2
+    coq
+    tla
     # purescript
     unstable.purescript
     # rust
@@ -61,8 +61,8 @@ in
     rustracer
     rustup
     # scala & JVM
-    ammonite2_11
     ammonite2_12
+    ammonite2_13
     coursier
     mill
     openjdk
@@ -71,7 +71,8 @@ in
     visualvm
     # data science
     julia_11
-    pythonDS
+    nbstripout
+    pythonEnv
   ];
 
   environment.variables = {
@@ -85,6 +86,7 @@ in
   virtualisation.virtualbox = {
     host.enable = true;
     host.enableHardening = true;
+    host.enableExtensionPack = true;
   };
 
   users.users.kj = {

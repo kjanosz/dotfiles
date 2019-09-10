@@ -9,7 +9,6 @@ let
 in
 {
   imports = [
-    ./modules/beanstalkd.nix
     ./modules/kanboard.nix
   ];
 

@@ -36,7 +36,7 @@
       dates = "weekly";
       options = "--delete-older-than 10d";
     };
-    useSandbox = true;
+    useSandbox = "relaxed";
   };
 
   nixpkgs.config.allowUnfree = false;

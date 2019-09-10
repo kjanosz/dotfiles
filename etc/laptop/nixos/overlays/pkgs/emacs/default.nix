@@ -4,13 +4,13 @@ let
   # 2018-11-01T10:06:56-04:00
   proofgeneral = pkgs.emacsPackages.proofgeneral_HEAD.overrideAttrs (oldAttrs: rec {
     name = "proof-general-${version}";
-    version = "HEAD";
+    version = "4.5";
 
     src = pkgs.fetchFromGitHub {
       owner = "ProofGeneral";
       repo = "PG";
-      rev = "15cf5a3f1e3ba35d832e1464a1b729905aed78a8";
-      sha256 = "0xcgm9wg3cagkv3amq2rc0ij9jr81nijzlraxmv39i3w1qr69pdr";
+      rev = "d53ded580e30d49e7a783280fd9ba96bc9c1c39c";
+      sha256 = "17hf4mxpijvgd2jrffibcz9ps4vv8w2alcgmh78xjlb6mm0p3ls0";
     };
   });
 

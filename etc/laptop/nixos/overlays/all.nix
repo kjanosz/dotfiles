@@ -10,21 +10,18 @@ foldlExtensions [
   })
 
   (self: super: {
-    # 2019-05-15T19:54:37-04:00
-    unstable = nixpkgsOf {
-      rev = "bc9df0f66110039e495b6debe3a6cda4a1bb0fed";
-      sha256 = "0y2w259j0vqiwjhjvlbsaqnp1nl2zwz6sbwwhkrqn7k7fmhmxnq1";
-    };
+    unstable = import (builtins.fetchGit {
+      url = "https://github.com/NixOS/nixpkgs-channels";
+      ref = "nixos-unstable";
+    }) { config = { allowUnfree = true; }; };
   })
 
   (self: super: {
     calibre = super.calibre.overrideAttrs (oldAttrs: {
-      buildInputs = oldAttrs.buildInputs ++ [ super.python27Packages.dns ];
+      buildInputs = oldAttrs.buildInputs ++ (with super.python2Packages; [ pycrypto ]);
     });
 
     desktop_utils = super.callPackage ./pkgs/desktop_utils { };
-
-    mullvad = super.callPackage ./pkgs/mullvad { };
   })
 
   (self: super: foldlExtensions [

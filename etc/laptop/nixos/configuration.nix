@@ -2,6 +2,7 @@
 
 {
   imports = [
+    ./cachix.nix
     ./common.nix
     ./secrets.nix
     # ./modules/backup.nix
@@ -31,6 +32,10 @@
     extraConfig = ''
       load-module module-native-protocol-tcp auth-ip-acl=127.0.0.1
     '';
+  };
+  sound.mediaKeys = {
+    enable = true;
+    volumeStep = "5%";
   };
 
   hardware.opengl = {
@@ -94,6 +99,8 @@
   environment.systemPackages = with pkgs; [
     acpi
     appimage-run
+    asciidoc-full-with-plugins
+    asciidoctor
     aspell
     aspellDicts.de
     aspellDicts.en
@@ -130,7 +137,7 @@
     lightdm
     lm_sensors
     mpv
-    mullvad
+    unstable.mullvad-vpn
     ncmpcpp
     networkmanagerapplet
     nix-prefetch-github
@@ -144,6 +151,7 @@
     unstable.protonmail-bridge
     rofi
     rofi-pass
+    samba
     termite
     texlive.combined.scheme-full
     tomb
@@ -291,7 +299,7 @@
     home = "/home/kj";
     description = "Krzysztof Janosz";
     extraGroups = [ "networkmanager" "wheel" ];
-    packages = with pkgs; [ cabextract hledger steam thunderbird unstable.playonlinux unstable.wine ];
+    packages = with pkgs; [ cabextract hledger playonlinux steam thunderbird wine ];
   };
 
   users.users.kjw = {
