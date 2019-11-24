@@ -4,7 +4,7 @@ with lib;
 
 # UrBackup
 let
-  cfg = config.backup;
+  cfg = config.services.backup;
   
   backupVolume = n: c:
   let
@@ -47,7 +47,7 @@ in
 {
 
   options = {
-    backup = {
+    services.backup = {
       volumes = mkOption {
         type = types.attrs (types.submodule {
           options = {

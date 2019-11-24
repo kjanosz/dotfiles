@@ -73,6 +73,4 @@
     vim
     zip
   ];
-
-  system.stateVersion = "18.09";
 }

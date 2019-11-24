@@ -40,6 +40,8 @@ in base.emacsWithPackages (epkgs: with epkgs; with epkgs.melpaPackages; [
   ranger
   helm-ag
   helm-projectile
+  lsp-mode
+  lsp-ui
 
   # coq
   proofgeneral
@@ -71,7 +73,6 @@ in base.emacsWithPackages (epkgs: with epkgs; with epkgs.melpaPackages; [
   flycheck-rust
 
   # scala
-  ensime
   sbt-mode
   scala-mode
 

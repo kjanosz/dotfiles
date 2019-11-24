@@ -1,5 +1,8 @@
 { config, lib, pkgs, ... }:
 
+let
+  mullvadDNS = "193.138.218.74";
+in
 {
   imports = [
     ./cachix.nix
@@ -7,6 +10,7 @@
     ./secrets.nix
     # ./modules/backup.nix
     ./modules/gpg-profiles.nix
+    ./modules/mullvad.nix
     ./dev.nix
     ./work.nix
   ];
@@ -14,7 +18,11 @@
   networking = {
     hostName = "nixos";
     extraHosts = "127.0.0.1 ${config.networking.hostName}";
-    networkmanager.enable = true;
+    nameservers = [ "193.138.218.74" ];
+    networkmanager = {
+      enable = true;
+      dns = lib.mkForce "none";
+    };
   };
 
   hardware.bluetooth = {
@@ -137,7 +145,7 @@
     lightdm
     lm_sensors
     mpv
-    unstable.mullvad-vpn
+    mullvad-vpn
     ncmpcpp
     networkmanagerapplet
     nix-prefetch-github
@@ -290,6 +298,11 @@
       '';
       ExecStop = "${pkgs.utillinux}/bin/umount ${config.users.users.kjw.home}/.gnupg";
     };
+  };
+
+  networking.wireguard.enable = true;
+  services.mullvad = {
+    enable = true;
   };
 
   users.users.kj = {
