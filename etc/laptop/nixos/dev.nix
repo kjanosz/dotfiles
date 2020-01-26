@@ -12,25 +12,26 @@ let
     fi
   '';
 
-  summonWithGopass = pkgs.summon.withPlugins { providers = [ pkgs.gopass ]; };
-
   pythonEnv = pkgs.python3.withPackages (ps: with ps; [ 
     jupyter_core jupyter_client jupyterlab jupyterlab_launcher notebook ipython ipykernel
   ]);
 in
 {
+  environment.pathsToLink = [
+    "/lib/summon/"
+  ];
+
   environment.systemPackages = with pkgs; [
     # general
-    dbeaver
-    docker_compose
-    insomnia
-    summonWithGopass
-    # toolchain
     ack
     ag
+    dbeaver
+    docker_compose
     gcc
     gdb
     gnumake
+    insomnia
+    summon
     # ide
     editorScript
     emacs
@@ -60,7 +61,7 @@ in
     rustfmt
     rustracer
     rustup
-    # scala & JVM
+    # scala & jvm
     ammonite2_12
     ammonite2_13
     coursier
@@ -82,7 +83,9 @@ in
   programs.adb.enable = true;
 
   virtualisation.docker.enable = true;
+
   virtualisation.libvirtd.enable = true;
+  
   virtualisation.virtualbox = {
     host.enable = true;
     host.enableHardening = true;
@@ -95,6 +98,24 @@ in
       wireshark
     ];
   };  
+
+  users.users.kjw = {
+    extraGroups = [ "docker" "vboxusers" ];
+    packages = with pkgs; [
+      ansible
+      awscli
+      aws-vault
+      unstable.flyway
+      go
+      mysql
+      nailgun
+      nodejs
+      unstable.packer
+      unstable.slack
+      albacross.summon-aws-secrets
+      albacross.terraform
+    ];
+  };
 
   systemd.user.services.emacs = {
     wantedBy = [ "default.target" ];
@@ -109,5 +130,30 @@ in
       ExecStop = "${pkgs.emacs}/bin/emacsclient --eval (kill-emacs)";
       Restart = "always";
     };
+  };
+
+  docker-containers.kaggle-python = {
+    cmd = [
+      "jupyter-notebook"
+      "--no-browser" 
+      "--ip=127.0.0.1"
+      "--notebook-dir=/tmp/kaggle"
+      "--NotebookApp.token=''"
+    ];
+    extraDockerOptions = [
+      "--network=host"
+    ];
+    image = "gcr.io/kaggle-images/python";
+    log-driver = "journald";
+    user = "1000:100";
+    volumes = [
+      "/home/kj/Dev/kaggle:/tmp/kaggle"
+      "/home/kj/.local/share/jupyter:/.local/share/jupyter"
+    ];
+    workdir = "/tmp/kaggle";
+  };
+  systemd.services.docker-kaggle-python = {
+    partOf = [ "user@1000.service" ];
+    wantedBy = [ "user@1000.service" ];
   };
 }  

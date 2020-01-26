@@ -2,13 +2,13 @@
 
 let 
   checksums = {
-    "2.12" = "1fi5j0kcndq00x72d8bkx6qiy9nh2i6c6m29gzfqql52qgbq1fd0";
-    "2.13" = "0d8zdy1zkky4w3arvb097vbhnjaz3vicf1c37dn15x0qrhlbn4s8";
+    "2.12" = "068lcdi1y3zcspr0qmppflad7a4kls9gi321rp8dc5qc6f9nnk04";
+    "2.13" = "0fa0q9nk00crr2ws2mmw6pp4vf0xy53bqqhnws524ywwg6zwrl9s";
   };
 in
 stdenv.mkDerivation rec {
   name = "ammonite-${version}";
-  version = "1.6.9";
+  version = "2.0.4";
   src = fetchurl {
     url = "https://github.com/lihaoyi/Ammonite/releases/download/${version}/${scala}-${version}";
     sha256 = checksums."${scala}";

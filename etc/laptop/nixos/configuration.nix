@@ -12,18 +12,16 @@ in
     ./modules/gpg-profiles.nix
     ./modules/mullvad.nix
     ./dev.nix
-    ./work.nix
   ];
 
   networking = {
     hostName = "nixos";
     extraHosts = "127.0.0.1 ${config.networking.hostName}";
     nameservers = [ "193.138.218.74" ];
-    networkmanager = {
-      enable = true;
-      dns = lib.mkForce "none";
-    };
+    networkmanager.enable = true;
+    wireguard.enable = true;
   };
+  services.mullvad.enable = true;
 
   hardware.bluetooth = {
     enable = true;
@@ -37,17 +35,27 @@ in
     enable = true;
     package = pkgs.pulseaudioFull;
     support32Bit = true;
-    extraConfig = ''
-      load-module module-native-protocol-tcp auth-ip-acl=127.0.0.1
-    '';
-  };
-  sound.mediaKeys = {
-    enable = true;
-    volumeStep = "5%";
+    tcp = {
+      enable = true;
+      anonymousClients.allowedIpRanges = [ "127.0.0.1" ];
+    };
   };
 
   hardware.opengl = {
     driSupport32Bit = true;
+  };
+
+  location.provider = "geoclue2";
+  services.geoclue2.enable = true;
+  time.timeZone = "Europe/Warsaw";
+
+  hardware.acpilight.enable = true;
+  services.redshift = {
+    enable = true;
+    temperature = {
+      day = 6500;
+      night = 4000;
+    };
   };
 
   fonts = {
@@ -69,8 +77,6 @@ in
     };
   };
   
-  time.timeZone = "Europe/Warsaw";
-
   nix = {
     buildCores = 8;
     maxJobs = 8;
@@ -82,6 +88,7 @@ in
   
   nixpkgs = {
     config = {
+      allowBroken = true;
       allowUnfree = true;
       chromium = {
         enableWideVine = true;
@@ -89,88 +96,6 @@ in
     };
     overlays = [ (import ./overlays) ];
   };  
-
-  environment.extraInit = let
-    cp = "cp --no-preserve=mode --remove-destination --symbolic-link --recursive";
-  in ''
-    if [ "$USER" != "root" ]; then
-      GLOBAL="/run/current-system/sw/lib/mozilla/native-messaging-hosts"
-      PER_USER="etc/per-user-pkgs/$USER/lib/mozilla/native-messaging-hosts"
-
-      rm -rf $HOME/.mozilla/native-messaging-hosts
-      mkdir -p $HOME/.mozilla/native-messaging-hosts
-      [ -d "$GLOBAL" ] && ${cp} "$GLOBAL"  "$HOME/.mozilla/"
-      [ -d "$PER_USER" ] && ${cp} "$PER_USER" "$HOME/.mozilla/"
-    fi  
-  '';
-
-  environment.systemPackages = with pkgs; [
-    acpi
-    appimage-run
-    asciidoc-full-with-plugins
-    asciidoctor
-    aspell
-    aspellDicts.de
-    aspellDicts.en
-    aspellDicts.pl
-    bindfs
-    blueman
-    unstable.browserpass
-    cachix
-    calibre
-    unstable.chromium
-    desktop_utils.i3-lock-screen
-    desktop_utils.i3-merge-configs
-    dmidecode
-    dunst
-    exiv2
-    feh
-    unstable.firefox-unwrapped
-    ghostscript
-    gimp-with-plugins
-    go-mtpfs
-    google-chrome
-    unstable.gopass
-    gtk-engine-murrine
-    hdparm
-    i3lock
-    i3status
-    imagemagick
-    imgurbash2
-    inkscape
-    unstable.keybase
-    unstable.keybase-gui
-    libnotify
-    libreoffice
-    lightdm
-    lm_sensors
-    mpv
-    mullvad-vpn
-    ncmpcpp
-    networkmanagerapplet
-    nix-prefetch-github
-    nix-prefetch-scripts
-    numix-gtk-theme
-    numix-icon-theme
-    numix-icon-theme-circle
-    pass # for protonmail-bridge
-    pavucontrol
-    pdftk
-    unstable.protonmail-bridge
-    rofi
-    rofi-pass
-    samba
-    termite
-    texlive.combined.scheme-full
-    tomb
-    unrar
-    upower
-    xdotool
-    xsel
-    xss-lock
-    xzoom
-    zathura
-  ];
 
   security.sudo.extraRules = [
     {
@@ -187,54 +112,29 @@ in
       ];
     }
   ];
-  
-  programs.ssh.startAgent = false;
 
   programs.browserpass.enable = true;
   
-  services.pcscd.enable = true;
-
   services.upower.enable = true;
 
-  services.xserver = {
-    enable = true;
-    layout = "pl";
+  services.udev.packages = with pkgs; [ 
+    libu2f-host
+    yubikey-personalization 
+  ];
 
-    synaptics = {
-      enable = true;
-      twoFingerScroll = true;
-      tapButtons = true;
-      fingersMap = [1 3 2];
-    };
-
-    desktopManager.xterm.enable = false;
-    displayManager.lightdm.enable = true;
-    windowManager.i3 = {
-      enable = true;
-      extraSessionCommands = ''
-         # Set GTK_PATH so that GTK+ can find the theme engines.
-         export GTK_PATH="${config.system.path}/lib/gtk-2.0:${config.system.path}/lib/gtk-3.0"
-
-         # Set GTK_DATA_PREFIX so that GTK+ can find the Xfce themes.
-         export GTK_DATA_PREFIX=${config.system.path}
-      
-         # SVG loader for pixbuf (needed for GTK svg icon themes)
-         export GDK_PIXBUF_MODULE_FILE=`echo ${pkgs.librsvg.out}/lib/gdk-pixbuf-2.0/*/loaders.cache` # */
-      '';
-    };  
-  };
+  services.dbus.packages = with pkgs; [
+    mopidy-mpris
+  ];
 
   services.mopidy = {
     enable = true;
     dataDir = "/var/lib/mopidy";
-    extensionPackages = with pkgs; [ mopidy-mopify mopidy-spotify ];
-    configuration = ''
-      [audio]
-      output = pulsesink server=127.0.0.1
-    '';
-    extraConfigFiles = [ "${config.services.mopidy.dataDir}/spotify.conf" ];
+    extensionPackages = with pkgs; [ mopidy-iris mopidy-mpris mopidy-spotify ];
+    extraConfigFiles = [ "${config.services.mopidy.dataDir}/mopidy.conf" ];
   };
 
+  programs.ssh.startAgent = false;
+  services.pcscd.enable = true;
   services.gnupg.profiles = {
     default = {
       gpg-agent = ''
@@ -276,16 +176,9 @@ in
       };
     };
   };
-
-  services.keybase.enable = true;
-  services.kbfs = {
-    enable = true;
-    mountPoint = "%h/Shared/Keybase";
-  };
-
   systemd.services.gnupgshare = {
-    wantedBy = [ "user-10000.slice" ];
-    partOf = [ "user-10000.slice" ];
+    partOf = [ "user@10000.service" ];
+    wantedBy = [ "user@10000.service" ];
     
     path = [ pkgs.bindfs pkgs.utillinux ];
     preStart = "mkdir -p ${config.users.users.kjw.home}/.gnupg";
@@ -300,10 +193,126 @@ in
     };
   };
 
-  networking.wireguard.enable = true;
-  services.mullvad = {
+  services.keybase.enable = true;
+  services.kbfs = {
     enable = true;
+    mountPoint = "%h/Shared/Keybase";
   };
+
+  services.xserver = {
+    enable = true;
+    layout = "pl";
+
+    synaptics = {
+      enable = true;
+      twoFingerScroll = true;
+      tapButtons = true;
+      fingersMap = [1 3 2];
+    };
+
+    desktopManager.xterm.enable = false;
+    displayManager.lightdm.enable = true;
+    windowManager.i3 = {
+      enable = true;
+      extraSessionCommands = ''
+         # Set GTK_PATH so that GTK+ can find the theme engines.
+         export GTK_PATH="${config.system.path}/lib/gtk-2.0:${config.system.path}/lib/gtk-3.0"
+
+         # Set GTK_DATA_PREFIX so that GTK+ can find the Xfce themes.
+         export GTK_DATA_PREFIX=${config.system.path}
+      
+         # SVG loader for pixbuf (needed for GTK svg icon themes)
+         export GDK_PIXBUF_MODULE_FILE=`echo ${pkgs.librsvg.out}/lib/gdk-pixbuf-2.0/*/loaders.cache` # */
+      '';
+    };  
+  };
+
+  environment.extraInit = let
+    cp = "cp --no-preserve=mode --remove-destination --symbolic-link --recursive";
+  in ''
+    if [ "$USER" != "root" ]; then
+      GLOBAL="/run/current-system/sw/lib/mozilla/native-messaging-hosts"
+      PER_USER="etc/per-user-pkgs/$USER/lib/mozilla/native-messaging-hosts"
+
+      rm -rf $HOME/.mozilla/native-messaging-hosts
+      [ -d "$GLOBAL" ] && ${cp} "$GLOBAL"  "$HOME/.mozilla/"
+      [ -d "$PER_USER" ] && ${cp} "$PER_USER" "$HOME/.mozilla/"
+    fi  
+  '';
+
+  environment.systemPackages = with pkgs; [
+    acpi
+    acpilight
+    appimage-run
+    asciidoc-full-with-plugins
+    asciidoctor
+    aspell
+    aspellDicts.de
+    aspellDicts.en
+    aspellDicts.pl
+    bindfs
+    blueman
+    unstable.browserpass
+    cachix
+    calibre
+    unstable.chromium
+    desktop_utils.i3-lock-screen
+    desktop_utils.i3-merge-configs
+    dmidecode
+    dunst
+    exiv2
+    feh
+    unstable.firefox
+    ghostscript
+    gimp-with-plugins
+    go-mtpfs
+    gopass
+    gtk-engine-murrine
+    hdparm
+    i3lock
+    i3status
+    imagemagick
+    imgurbash2
+    inkscape
+    unstable.keybase
+    unstable.keybase-gui
+    libnotify
+    libreoffice
+    lightdm
+    lm_sensors
+    mpv
+    mullvad-vpn
+    ncmpcpp
+    networkmanagerapplet
+    nix-prefetch-github
+    nix-prefetch-scripts
+    numix-gtk-theme
+    numix-icon-theme
+    numix-icon-theme-circle
+    pandoc
+    pavucontrol
+    pdftk
+    playerctl
+    unstable.protonmail-bridge
+    redshift
+    rofi
+    rofi-pass
+    samba
+    termite
+    texlive.combined.scheme-full
+    tomb
+    unrar
+    upower
+    xdotool
+    xsel
+    xss-lock
+    xzoom
+    yubico-piv-tool
+    yubikey-manager
+    yubikey-manager-qt
+    yubikey-personalization
+    zathura
+  ];
 
   users.users.kj = {
     passwordFile = "/var/lib/users/kj.password";
@@ -311,8 +320,15 @@ in
     isNormalUser = true;
     home = "/home/kj";
     description = "Krzysztof Janosz";
-    extraGroups = [ "networkmanager" "wheel" ];
-    packages = with pkgs; [ cabextract hledger playonlinux steam thunderbird wine ];
+    extraGroups = [ "networkmanager" "wheel" "video" ];
+    packages = with pkgs; [ 
+      cabextract 
+      hledger 
+      playonlinux 
+      (steam.override { extraPkgs = pkgs: [ libffi qt5.qtbase qt5.qttools qt5.qtsvg ]; })
+      thunderbird 
+      wine 
+    ];
   };
 
   users.users.kjw = {
@@ -321,7 +337,7 @@ in
     isNormalUser = true;
     home = "/home/kjw";
     description = "Krzysztof Janosz (Work)";
-    extraGroups = [ "networkmanager" ];
+    extraGroups = [ "networkmanager" "video" ];
     packages = with pkgs; [ ];
   };
 }

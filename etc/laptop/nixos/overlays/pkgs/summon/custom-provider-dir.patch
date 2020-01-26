@@ -7,7 +7,7 @@ index 579d430..1a73496 100644
  		return "C:\\Program Files\\Cyberark Conjur\\Summon\\Providers"
  	} else {
 -		return "/usr/local/lib/summon"
-+		value, exists := os.LookupEnv("SUMMON_PROVIDER_DIR")
++		value, exists := os.LookupEnv("SUMMON_PROVIDERS_DIR")
 +		if !exists {
 +			value = "/usr/local/lib/summon"
 +		}
