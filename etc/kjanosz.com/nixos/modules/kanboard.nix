@@ -100,20 +100,7 @@ in
     }; 
   
     services.nginx.virtualHosts = {
-      "${cfg.subdomain}.${config.networking.hostName}" = {
-        forceSSL = true;
-        enableACME = true;
-
-        extraConfig = ''
-          index index.php;
-          root ${kanboardRoot};
-
-          location / {
-              try_files $uri $uri/ /index.php$is_args$args;
-          }
-
-          location ~ \.php$ {
-              try_files $uri =404;
+      "${cfg.subdomain}.${config.networking.hosttimescaledb
               fastcgi_split_path_info ^(.+\.php)(/.+)$;
               fastcgi_pass unix:/var/run/php-fpm-kanboard.sock;
               fastcgi_index index.php;

@@ -64,6 +64,7 @@
     ranger
     smartmontools
     strace
+    tomb
     unzip
     usbutils
     vim

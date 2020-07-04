@@ -296,7 +296,6 @@ in
     samba
     termite
     texlive.combined.scheme-full
-    tomb
     unrar
     upower
     xdotool

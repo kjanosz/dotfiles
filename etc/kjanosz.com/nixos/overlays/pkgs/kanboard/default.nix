@@ -8,13 +8,13 @@ with stdenv.lib;
 
 stdenv.mkDerivation rec {
   name = "kanboard";
-  version = "1.2.7";
+  version = "1.2.15";
 
   src = fetchFromGitHub {
     owner = "kanboard";
     repo = "kanboard";
     rev = "v${version}";
-    sha256 = "0jg3av7r5v25dkxxyx5lp0cwvvpj25hvpfrj57azhc2h61psqn1r";
+    sha256 = "0lib2qlc8a59i9dak0g1j5hymwbq9vhflp5srhcjislxypfvrizs";
   };
 
   buildInputs = [ pkgs.unzip ];
