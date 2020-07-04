@@ -21,7 +21,7 @@ foldlExtensions [
 
     ammonite2_13 = super.callPackage pkgs/ammonite { scala = "2.13"; };
 
-    emacs = super.callPackage pkgs/emacs { pkgs = super.unstable; };
+    docker-data-science = super.callPackage pkgs/docker-data-science { };
 
     haskell-ide-engine = hies.selection { selector = p: { inherit (p) ghc865 ghc844; }; };
 
@@ -30,7 +30,7 @@ foldlExtensions [
     nbstripout = with super.python3Packages; buildPythonApplication rec {
       name = "${pname}-${version}";
       pname = "nbstripout";
-      version = "0.3.6";
+      version = "0.3.7";
 
       src = fetchPypi {
         inherit pname version;
@@ -43,11 +43,11 @@ foldlExtensions [
     };
 
     rustChannels = {
-      stable = (super.rustChannelOf { date = "2019-12-19"; channel = "stable"; }).rust;
+      stable = (super.rustChannelOf { date = "2020-06-18"; channel = "stable"; }).rust;
 
-      beta = (super.rustChannelOf { date = "2020-01-15"; channel = "beta"; }).rust;
+      beta = (super.rustChannelOf { date = "2020-06-16"; channel = "beta"; }).rust;
 
-      nightly = (super.rustChannelOf { date = "2020-01-19"; channel = "nightly"; }).rust;
+      nightly = (super.rustChannelOf { date = "2020-06-18"; channel = "nightly"; }).rust;
     };
 
     summon = super.callPackage pkgs/summon { };

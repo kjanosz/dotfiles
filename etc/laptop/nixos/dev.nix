@@ -2,23 +2,9 @@
 
 with lib;
 
-let
-  editorScript = pkgs.writeScriptBin "emacseditor" ''
-    #!${pkgs.stdenv.shell}
-    if [ -z "$1" ]; then
-      exec ${pkgs.emacs}/bin/emacsclient --create-frame --alternate-editor ${pkgs.emacs}/bin/emacs
-    else
-      exec ${pkgs.emacs}/bin/emacsclient --alternate-editor ${pkgs.emacs}/bin/emacs "$@"
-    fi
-  '';
-
-  pythonEnv = pkgs.python3.withPackages (ps: with ps; [ 
-    jupyter_core jupyter_client jupyterlab jupyterlab_launcher notebook ipython ipykernel
-  ]);
-in
 {
   environment.pathsToLink = [
-    "/lib/summon/"
+    "/lib/summon"
   ];
 
   environment.systemPackages = with pkgs; [
@@ -27,23 +13,28 @@ in
     ag
     dbeaver
     docker_compose
+    unstable.flyway
     gcc
     gdb
     gnumake
     insomnia
+    nbstripout
+    unstable.packer
+    pre-commit
+    protobuf3_9
     summon
+    albacross.summon-aws-secrets # need to be to system package in order for pathsToLink to work
     # ide
-    editorScript
-    emacs
     unstable.idea.idea-community
+    vim
     vscode
     # haskell
     cabal2nix
     cabal-install
     ghc
     haskell-ide-engine
-    unstable.haskellPackages.apply-refact
-    unstable.haskellPackages.brittany
+    # unstable.haskellPackages.apply-refact
+    # unstable.haskellPackages.brittany
     # unstable.haskellPackages.HaRe
     # idris
     idris
@@ -57,27 +48,23 @@ in
     unstable.purescript
     # rust
     carnix
+    cargo-expand
+    llvmPackages.bintools
     rustChannels.stable
-    rustfmt
     rustracer
-    rustup
     # scala & jvm
     ammonite2_12
     ammonite2_13
     coursier
     mill
-    openjdk
+    openjdk11
     sbt
     scala
     visualvm
-    # data science
-    julia_11
-    nbstripout
-    pythonEnv
   ];
 
   environment.variables = {
-    EDITOR = mkOverride 900 "${editorScript}/bin/emacseditor";
+    EDITOR = mkOverride 900 "${pkgs.vim}/bin/vim";
   };
 
   programs.adb.enable = true;
@@ -95,6 +82,7 @@ in
   users.users.kj = {
     extraGroups = [ "adbusers" "docker" "kvm" "libvirtd" "vboxusers" ];
     packages = with pkgs; [
+      python3Packages.arelle-headless 
       wireshark
     ];
   };  
@@ -105,55 +93,36 @@ in
       ansible
       awscli
       aws-vault
-      unstable.flyway
       go
       mysql
       nailgun
       nodejs
-      unstable.packer
       unstable.slack
-      albacross.summon-aws-secrets
-      albacross.terraform
+      albacross.terraform_0_12
     ];
   };
 
-  systemd.user.services.emacs = {
-    wantedBy = [ "default.target" ];
-    
-    path = [ pkgs.gnupg ];
-    script = ''
-      export SSH_AUTH_SOCK=$(gpgconf --list-dirs agent-ssh-socket)
-      exec "$SHELL" --login -c "exec ${pkgs.emacs}/bin/emacs --daemon"
-    '';
-    serviceConfig = {
-      Type = "forking";
-      ExecStop = "${pkgs.emacs}/bin/emacsclient --eval (kill-emacs)";
-      Restart = "always";
-    };
-  };
-
-  docker-containers.kaggle-python = {
-    cmd = [
-      "jupyter-notebook"
-      "--no-browser" 
-      "--ip=127.0.0.1"
-      "--notebook-dir=/tmp/kaggle"
-      "--NotebookApp.token=''"
-    ];
-    extraDockerOptions = [
-      "--network=host"
-    ];
-    image = "gcr.io/kaggle-images/python";
-    log-driver = "journald";
-    user = "1000:100";
-    volumes = [
-      "/home/kj/Dev/kaggle:/tmp/kaggle"
-      "/home/kj/.local/share/jupyter:/.local/share/jupyter"
-    ];
-    workdir = "/tmp/kaggle";
-  };
-  systemd.services.docker-kaggle-python = {
-    partOf = [ "user@1000.service" ];
-    wantedBy = [ "user@1000.service" ];
-  };
+  # docker-containers.data-science = {
+  #   cmd = [
+  #     "jupyter-notebook"
+  #     "--no-browser" 
+  #     "--ip=127.0.0.1"
+  #     "--notebook-dir=/tmp/dev"
+  #     "--NotebookApp.token=''"
+  #   ];
+  #   extraDockerOptions = [
+  #     "--network=host"
+  #   ];
+  #   image = "kjanosz/data-science";
+  #   log-driver = "journald";
+  #   user = "1000:100";
+  #   volumes = [
+  #     "/home/kj/Dev:/tmp/dev"
+  #     "/home/kj/.local/share/jupyter:/.local/share/jupyter"
+  #   ];
+  #   workdir = "/tmp/dev";
+  # };
+  # systemd.services.docker-data-science = {
+  #   requisite = [ "user@1000.service" ];
+  # };
 }  

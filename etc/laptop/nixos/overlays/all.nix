@@ -26,19 +26,19 @@ foldlExtensions [
     gopass = super.unstable.gopass.overrideAttrs (oldAttrs: rec {
       postInstall = ''
         ${oldAttrs.postInstall}
-        mkdir -p $bin/lib/summon
-        ln -sf $bin/bin/gopass $bin/lib/summon/gopass
+        mkdir -p $out/lib/summon
+        ln -sf $out/bin/gopass $out/lib/summon/gopass
       '';
     });
 
-    mopidy-mpris = super.callPackage ./pkgs/mopidy-mpris { };
+    mellowplayer = super.callPackage ./pkgs/mellowplayer { };
 
     mullvad-vpn = super.unstable.mullvad-vpn.overrideAttrs (oldAttrs: rec {
         name = "mullvad-vpn-${version}";
-        version = "2019.10";
+        version = "2020.4";
         src = super.pkgs.fetchurl {
           url = "https://www.mullvad.net/media/app/MullvadVPN-${version}_amd64.deb";
-          sha256 = "0nckbhfpf4r5l5h22jcv93b5i9y2sc8lhcaffsg2ld804h5ygbbq";
+          sha256 = "17xi8g2k89vi4d0j7pr33bx9zjapa2qh4pymbrqvxwli3yhq6zwr";
         };
     });
   })

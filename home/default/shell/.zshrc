@@ -1,6 +1,3 @@
-# Emacs TRAMP does not like fancy prompts
-[ "$TERM" != "dumb" ] || exec /bin/sh
-
 if [ -f "$HOME/.zshrc.base" ]; then
   . $HOME/.zshrc.base
 fi

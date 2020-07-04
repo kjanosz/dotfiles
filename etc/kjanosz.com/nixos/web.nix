@@ -33,7 +33,7 @@ in
 
       sslCiphers = "EECDH+AESGCM:EDH+AESGCM:AES256+EECDH:AES256+EDH";
       sslDhparam = "${cfg.package}/dhparam.pem";
-      sslProtocols = "TLSv1.1 TLSv1.2";
+      sslProtocols = "TLSv1.2 TLSv1.3";
       
       appendHttpConfig = ''
         log_format main '$remote_addr - $remote_user [$time_local] "$request" '
@@ -49,7 +49,7 @@ in
         ssl_stapling on;
         ssl_stapling_verify on;
 
-        resolver 8.8.8.8 8.8.4.4 valid=300s;
+        resolver 1.1.1.1 8.8.8.8 8.8.4.4 valid=300s;
         resolver_timeout 5s;
 
         add_header Strict-Transport-Security "max-age=63072000; includeSubdomains" always;
@@ -68,13 +68,18 @@ in
       };
     };
 
-    security.acme.certs = filterAttrs (n: v: v != {}) (
-      mapAttrs (vhostName: vhostConfig:
-        optionalAttrs vhostConfig.enableACME {
-          group = cfg.group;
-          allowKeysForGroup = true;
-        }
-      ) cfg.virtualHosts
-    );
+    security.acme = {
+      acceptTerms = true;
+      email = "contact@kjanosz.com";
+
+      certs = filterAttrs (n: v: v != {}) (
+        mapAttrs (vhostName: vhostConfig:
+          optionalAttrs vhostConfig.enableACME {
+            group = cfg.group;
+            allowKeysForGroup = true;
+          }
+        ) cfg.virtualHosts
+      );
+    };
   };
 }

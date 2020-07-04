@@ -47,9 +47,9 @@ in
     systemd.services.mullvad = {
       description = "Mullvad VPN daemon service";
       wants = [ "network.target" ];
-      after = [ "network-online.target" "systemd-resolved.service" ];
+      after = [ "network-online.target" "NetworkManager.service" "systemd-resolved.service" ];
       wantedBy = [ "multi-user.target" ];
-      path = with pkgs; [ iproute iputils ];
+      path = with pkgs; [ iproute "/run/wrappers" ];
 
       environment = lib.filterAttrs (k: v: v != null) {
         MULLVAD_LOG_DIR = cfg.logDirectory;

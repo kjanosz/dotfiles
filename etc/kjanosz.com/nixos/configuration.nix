@@ -5,7 +5,7 @@
     ./common.nix
     ./hardware-configuration.nix
     ./storage.nix
-    ./monitoring.nix
+    # ./monitoring.nix
     ./tasks.nix
     ./web.nix
   ];

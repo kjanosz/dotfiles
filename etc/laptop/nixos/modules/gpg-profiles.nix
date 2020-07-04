@@ -126,17 +126,8 @@ in
         
     environment.systemPackages = [ gpg-switch ] ++ writtenProfiles;
 
-    systemd.user.services.gnupg = {
-      wantedBy = [ "default.target" ];
-      
-      serviceConfig = {
-        Type = "forking";
-        Restart = "always";
-        KillSignal = "SIGKILL";
-        ExecPreStart = "${gpg-switch}/bin/gpg-switch -p default";
-        ExecStart = "${pkgs.gnupg}/bin/gpgconf --launch gpg-agent";
-        ExecStop = "S{pkgs.gnupg}/bin/gpgconf --kill gpg-agent";
-      };
-    };
+    # environment.extraInit = ''
+    #   ${gpg-switch}/bin/gpg-switch -p default -r
+    # '';
   };
 }

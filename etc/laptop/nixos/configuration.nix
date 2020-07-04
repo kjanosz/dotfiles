@@ -25,10 +25,11 @@ in
 
   hardware.bluetooth = {
     enable = true;
-    extraConfig = ''
-      [General]
-      Enable=Source,Sink,Media,Socket
-    '';
+    config = {
+      General = {
+        Enable = "Source,Sink,Media,Socket";
+      };
+    };
   };  
 
   hardware.pulseaudio = {
@@ -68,13 +69,13 @@ in
     ];
   };
 
-  i18n = {
-    consoleFont = "ter-m24n";
-    consolePackages = with pkgs; [ terminus_font ];
-    inputMethod = {
-      enabled = "fcitx";
-      fcitx.engines = with pkgs.fcitx-engines; [ m17n table-other ];
-    };
+  console = {
+    font = "ter-m24n";
+    packages = with pkgs; [ terminus_font ];
+  };
+  i18n.inputMethod = {
+    enabled = "fcitx";
+    fcitx.engines = with pkgs.fcitx-engines; [ m17n table-other ];
   };
   
   nix = {
@@ -88,7 +89,6 @@ in
   
   nixpkgs = {
     config = {
-      allowBroken = true;
       allowUnfree = true;
       chromium = {
         enableWideVine = true;
@@ -122,17 +122,15 @@ in
     yubikey-personalization 
   ];
 
-  services.dbus.packages = with pkgs; [
-    mopidy-mpris
-  ];
-
-  services.mopidy = {
-    enable = true;
-    dataDir = "/var/lib/mopidy";
-    extensionPackages = with pkgs; [ mopidy-iris mopidy-mpris mopidy-spotify ];
-    extraConfigFiles = [ "${config.services.mopidy.dataDir}/mopidy.conf" ];
+  programs.gnupg = {
+    agent = {
+      enable = true;
+      enableBrowserSocket = true;
+      enableExtraSocket = true;
+      enableSSHSupport = true;
+      pinentryFlavor = "gtk2";
+    };
   };
-
   programs.ssh.startAgent = false;
   services.pcscd.enable = true;
   services.gnupg.profiles = {
@@ -140,14 +138,12 @@ in
       gpg-agent = ''
         default-cache-ttl 10
         max-cache-ttl 10
-
         enable-ssh-support
         default-cache-ttl-ssh 10
         max-cache-ttl-ssh 10
       '';
 
       scdaemon = ''
-        deny-admin
         reader-port "Yubico YubiKey OTP+FIDO+CCID"
         card-timeout 60
       '';
@@ -226,6 +222,7 @@ in
       '';
     };  
   };
+  services.gnome3.glib-networking.enable = true;
 
   environment.extraInit = let
     cp = "cp --no-preserve=mode --remove-destination --symbolic-link --recursive";
@@ -252,18 +249,17 @@ in
     aspellDicts.pl
     bindfs
     blueman
-    unstable.browserpass
+    browserpass
     cachix
     calibre
-    unstable.chromium
+    chromium
     desktop_utils.i3-lock-screen
     desktop_utils.i3-merge-configs
     dmidecode
     dunst
     exiv2
     feh
-    unstable.firefox
-    ghostscript
+    firefox
     gimp-with-plugins
     go-mtpfs
     gopass
@@ -274,12 +270,12 @@ in
     imagemagick
     imgurbash2
     inkscape
-    unstable.keybase
-    unstable.keybase-gui
+    keybase-gui
     libnotify
     libreoffice
     lightdm
     lm_sensors
+    mellowplayer
     mpv
     mullvad-vpn
     ncmpcpp
@@ -324,6 +320,7 @@ in
     packages = with pkgs; [ 
       cabextract 
       hledger 
+      lutris
       playonlinux 
       (steam.override { extraPkgs = pkgs: [ libffi qt5.qtbase qt5.qttools qt5.qtsvg ]; })
       thunderbird 

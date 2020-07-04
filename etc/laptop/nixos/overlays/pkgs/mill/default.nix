@@ -2,10 +2,10 @@
 
 stdenv.mkDerivation rec {
   name = "mill-${version}";
-  version = "0.5.9";
+  version = "0.7.3";
   src = fetchurl {
-    url = "https://github.com/lihaoyi/mill/releases/download/${version}/${version}";
-    sha256 = "003rm2qqzzxf3g59fxd8vlll9payw1gcvjqvvf5axdyfr0sg4z1z";
+    url = "https://github.com/lihaoyi/mill/releases/download/${version}/${version}-assembly";
+    sha256 = "0qwlj8x7gpm9shvxfy22ij575n923xqhha16scdxi767vv5fj4gg";
   };
 
   phases = [ "installPhase" ];

@@ -10,10 +10,8 @@
     version = 2;
   };
     
-  i18n = {
-    consoleKeyMap = "pl";
-    defaultLocale = "en_DK.UTF-8";
-  };
+  console.keyMap = "pl";
+  i18n.defaultLocale = "en_DK.UTF-8";
 
   programs.zsh = {
     enable = true;
@@ -38,8 +36,6 @@
     };
     useSandbox = "relaxed";
   };
-
-  nixpkgs.config.allowUnfree = false;
   
   environment.pathsToLink = [ "/share/oh-my-zsh" ];
   environment.systemPackages = with pkgs; [

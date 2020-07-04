@@ -4,9 +4,9 @@ with lib;
 
 buildGoModule rec {
   name = "summon-${version}";
-  version = "0.8.0";
+  version = "0.8.1";
 
-  modSha256 = "0r8rassxr1cv8hsrqpfcw3arjxzq8qg3a1lchdkawhw4sady8vc6"; 
+  modSha256 = "1586z9g4i638kcnzz69q9c3xjbig0g74hrnkd6bgbdqpv21k2c17"; 
 
   buildInputs = [ makeWrapper ];
 

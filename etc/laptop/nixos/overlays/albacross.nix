@@ -3,14 +3,14 @@ self: super:
 {
     summon-aws-secrets = super.callPackage ./pkgs/summon-aws-secrets { };
 
-    terraform = super.unstable.terraform.overrideAttrs (oldAttrs: rec {
+    terraform_0_12 = super.unstable.terraform.overrideAttrs (oldAttrs: rec {
         name = "terraform-${version}";
-        version = "0.11.10";
+        version = "0.12.20";
         src = super.pkgs.fetchFromGitHub {
             owner  = "hashicorp";
             repo   = "terraform";
             rev    = "v${version}";
-            sha256 = "08mapla89g106bvqr41zfd7l4ki55by6207qlxq9caiha54nx4nb";
+            sha256 = "1k94iwhdvp1ifg9w7y26cl89ihki2w9kxv8mz06pp9bnfwfw67x5";
         };
     });
 }
