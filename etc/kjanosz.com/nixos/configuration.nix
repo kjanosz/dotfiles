@@ -2,18 +2,19 @@
 
 {
   imports = [
+    # ./cloud.nix
     ./common.nix
+    ./git.nix
     ./hardware-configuration.nix
+    ./mail.nix
     ./storage.nix
-    # ./monitoring.nix
-    ./tasks.nix
     ./web.nix
   ];
 
   boot.loader.grub.device = "/dev/vda";
 
   networking = {
-    hostName = "kjanosz.com";
+    domain = "kjanosz.com";
     firewall.allowedTCPPorts = [ 80 443 ];
     wireless.enable = false;
   };
@@ -21,6 +22,8 @@
   time.timeZone = "Europe/Frankfurt";
 
   nixpkgs.overlays = [ (import ./overlays) ];
+
+  systemd.coredump.enable = true;
 
   services.openssh = {
     enable = true;
@@ -50,10 +53,14 @@
     enable = true;
   };
 
+  environment.systemPackages = with pkgs; [
+    gdb
+  ];
+
   system.autoUpgrade = {
     enable = true;
     dates = "04:00";
   };
 
-  virtualisation.docker.enable = true;
+  virtualisation.oci-containers.backend = "podman";
 }

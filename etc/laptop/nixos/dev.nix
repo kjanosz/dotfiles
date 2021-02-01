@@ -2,6 +2,9 @@
 
 with lib;
 
+let
+  ociBackend = config.virtualisation.oci-containers.backend;
+in
 {
   environment.pathsToLink = [
     "/lib/summon"
@@ -11,6 +14,7 @@ with lib;
     # general
     ack
     ag
+    arion
     dbeaver
     docker_compose
     unstable.flyway
@@ -23,7 +27,6 @@ with lib;
     pre-commit
     protobuf3_9
     summon
-    albacross.summon-aws-secrets # need to be to system package in order for pathsToLink to work
     # ide
     unstable.idea.idea-community
     vim
@@ -32,7 +35,6 @@ with lib;
     cabal2nix
     cabal-install
     ghc
-    haskell-ide-engine
     # unstable.haskellPackages.apply-refact
     # unstable.haskellPackages.brittany
     # unstable.haskellPackages.HaRe
@@ -41,7 +43,6 @@ with lib;
     # lisp
     racket
     # proof
-    acl2
     coq
     tla
     # purescript
@@ -56,6 +57,7 @@ with lib;
     ammonite2_12
     ammonite2_13
     coursier
+    dotty
     mill
     openjdk11
     sbt
@@ -69,7 +71,10 @@ with lib;
 
   programs.adb.enable = true;
 
-  virtualisation.docker.enable = true;
+  virtualisation.docker = {
+    enable = true;
+    enableNvidia = true;
+  };
 
   virtualisation.libvirtd.enable = true;
   
@@ -77,6 +82,7 @@ with lib;
     host.enable = true;
     host.enableHardening = true;
     host.enableExtensionPack = true;
+    host.package = pkgs.unstable.virtualbox;
   };
 
   users.users.kj = {
@@ -90,39 +96,45 @@ with lib;
   users.users.kjw = {
     extraGroups = [ "docker" "vboxusers" ];
     packages = with pkgs; [
-      ansible
       awscli
       aws-vault
-      go
-      mysql
-      nailgun
-      nodejs
-      unstable.slack
-      albacross.terraform_0_12
+      jq
+      kafkacat
+      openvpn
+      slack
+      wireshark
+      zoom-us
     ];
   };
 
-  # docker-containers.data-science = {
-  #   cmd = [
-  #     "jupyter-notebook"
-  #     "--no-browser" 
-  #     "--ip=127.0.0.1"
-  #     "--notebook-dir=/tmp/dev"
-  #     "--NotebookApp.token=''"
-  #   ];
-  #   extraDockerOptions = [
-  #     "--network=host"
-  #   ];
-  #   image = "kjanosz/data-science";
-  #   log-driver = "journald";
-  #   user = "1000:100";
-  #   volumes = [
-  #     "/home/kj/Dev:/tmp/dev"
-  #     "/home/kj/.local/share/jupyter:/.local/share/jupyter"
-  #   ];
-  #   workdir = "/tmp/dev";
-  # };
-  # systemd.services.docker-data-science = {
-  #   requisite = [ "user@1000.service" ];
-  # };
+  services.openvpn.servers.adcolony = {
+    autoStart = false;
+    config = "config /var/lib/openvpn/adcolony.ovpn";
+    updateResolvConf = true;
+  };
+
+  virtualisation.oci-containers.containers.data-science = {
+    cmd = [
+      "jupyter-notebook"
+      "--no-browser"
+      "--ip=127.0.0.1"
+      "--notebook-dir=/tmp/dev"
+      "--NotebookApp.token=''"
+    ];
+    extraOptions = [
+      "--network=host"
+    ];
+    image = "kjanosz/data-science";
+    log-driver = "journald";
+    user = "1000:100";
+    volumes = [
+      "/home/kj/Dev:/tmp/dev"
+      "/home/kj/.local/share/jupyter:/.local/share/jupyter"
+    ];
+    workdir = "/tmp/dev";
+  };
+  systemd.services."${ociBackend}-data-science" = {
+    partOf = [ "user@1000.service" ];
+    wantedBy = [ "user@1000.service" ];
+  };
 }  

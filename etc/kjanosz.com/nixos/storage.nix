@@ -17,9 +17,8 @@ in
   config = {
     services.postgresql = {
       enable = true;
-      package = postgresql_12;
+      package = unstable.postgresql_13;
       port = 5432;
-      dataDir = "/var/lib/postgresql/12.0";
 
       enableTCPIP = false;
       authentication = ''
@@ -28,12 +27,6 @@ in
         host    all   all   0.0.0.0/0     reject
       '';
 
-      extraPlugins = [
-        postgresqlPackages.timescaledb
-      ];
-      extraConfig = ''
-        shared_preload_libraries = 'timescaledb'
-      '';
       initialScript = pkgs.writeText "psql-init" (if cfg != null then concatStringsSep "\n" (attrValues cfg) else "");
     };
 
@@ -41,7 +34,7 @@ in
       enable = true;
       bind = "127.0.0.1";
       port = 6379;
-      unixSocket = "${config.services.redis.dbpath}/redis.sock";
+      unixSocket = "/run/redis/redis.socket";
     };
   };
 }

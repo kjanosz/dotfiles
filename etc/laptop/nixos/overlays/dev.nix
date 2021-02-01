@@ -7,11 +7,6 @@ let
     url = "https://github.com/mozilla/nixpkgs-mozilla";
     ref = "master";
   };
-
-  hies = import (builtins.fetchGit {
-    url = "https://github.com/Infinisil/all-hies";
-    ref = "master";
-  }) {};
 in
 foldlExtensions [
   (import (mozillaOverlays + "/rust-overlay.nix"))
@@ -20,10 +15,6 @@ foldlExtensions [
     ammonite2_12 = super.callPackage pkgs/ammonite { scala = "2.12"; };
 
     ammonite2_13 = super.callPackage pkgs/ammonite { scala = "2.13"; };
-
-    docker-data-science = super.callPackage pkgs/docker-data-science { };
-
-    haskell-ide-engine = hies.selection { selector = p: { inherit (p) ghc865 ghc844; }; };
 
     mill = super.callPackage pkgs/mill { };
 
@@ -43,14 +34,20 @@ foldlExtensions [
     };
 
     rustChannels = {
-      stable = (super.rustChannelOf { date = "2020-06-18"; channel = "stable"; }).rust;
+      stable = (super.rustChannelOf { date = "2020-12-31"; channel = "stable"; }).rust;
 
-      beta = (super.rustChannelOf { date = "2020-06-16"; channel = "beta"; }).rust;
+      beta = (super.rustChannelOf { date = "2021-01-06"; channel = "beta"; }).rust;
 
-      nightly = (super.rustChannelOf { date = "2020-06-18"; channel = "nightly"; }).rust;
+      nightly = (super.rustChannelOf { date = "2021-01-07"; channel = "nightly"; }).rust;
     };
 
-    summon = super.callPackage pkgs/summon { };
+    scala = super.scala.override { jre = super.openjdk11; };
+
+    sbt = super.sbt.override { jre = super.openjdk11; };
+
+    sbt_spark = super.sbt.override { jre = super.openjdk8; };
+
+    summon = super.unstable.summon;
 
     vscode = super.callPackage pkgs/vscode { pkgs = super.unstable; };
   })

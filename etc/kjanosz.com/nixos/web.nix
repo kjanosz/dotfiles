@@ -4,9 +4,7 @@ with pkgs;
 with lib;
 
 let
-  domain = "${config.networking.hostName}";
-  
-  homeDir = "/var/lib/nginx";
+  domain = "${config.networking.domain}";
   
   cfg = config.services.nginx;
 in
@@ -15,7 +13,6 @@ in
     services.nginx = {
       user = "nginx";
       group = "nginx";
-      stateDir = "${homeDir}";
 
       package = stdenv.lib.overrideDerivation nginx (oldAttrs: {
         postInstall = ''
@@ -52,9 +49,9 @@ in
         resolver 1.1.1.1 8.8.8.8 8.8.4.4 valid=300s;
         resolver_timeout 5s;
 
-        add_header Strict-Transport-Security "max-age=63072000; includeSubdomains" always;
-        add_header X-Frame-Options SAMEORIGIN;
-        add_header X-Content-Type-Options nosniff;
+        add_header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload" always;
+        add_header X-Frame-Options DENY always;
+        add_header X-Content-Type-Options nosniff always;
       '';
 
       virtualHosts = {
@@ -63,7 +60,7 @@ in
           default = true;
 
           forceSSL = true;
-          enableACME = true;
+          useACMEHost = domain;
         };
       };
     };
@@ -72,14 +69,18 @@ in
       acceptTerms = true;
       email = "contact@kjanosz.com";
 
-      certs = filterAttrs (n: v: v != {}) (
-        mapAttrs (vhostName: vhostConfig:
-          optionalAttrs vhostConfig.enableACME {
-            group = cfg.group;
-            allowKeysForGroup = true;
-          }
-        ) cfg.virtualHosts
-      );
+      certs."${domain}" = {
+        group = cfg.group;
+
+        domain = domain;
+        extraDomainNames = [
+          "*.${domain}"
+        ];
+
+        dnsProvider = "cloudflare";
+        dnsPropagationCheck = true;
+        credentialsFile = "/var/lib/secrets/cloudflare.env";
+      };
     };
   };
 }

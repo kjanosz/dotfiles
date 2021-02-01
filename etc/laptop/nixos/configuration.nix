@@ -9,19 +9,17 @@ in
     ./common.nix
     ./secrets.nix
     # ./modules/backup.nix
-    ./modules/gpg-profiles.nix
-    ./modules/mullvad.nix
     ./dev.nix
   ];
 
   networking = {
     hostName = "nixos";
     extraHosts = "127.0.0.1 ${config.networking.hostName}";
-    nameservers = [ "193.138.218.74" ];
+    nameservers = [ mullvadDNS ];
     networkmanager.enable = true;
     wireguard.enable = true;
   };
-  services.mullvad.enable = true;
+  services.mullvad-vpn.enable = true;
 
   hardware.bluetooth = {
     enable = true;
@@ -43,7 +41,12 @@ in
   };
 
   hardware.opengl = {
+    enable = true;
     driSupport32Bit = true;
+  };
+
+  hardware.openrazer = {
+    enable = true;
   };
 
   location.provider = "geoclue2";
@@ -111,6 +114,23 @@ in
         }
       ];
     }
+    {
+      users = [ "kjw" ];
+      commands = [
+        {
+          command = "/run/current-system/sw/bin/systemctl start openvpn-adcolony.service";
+          options = [ "NOPASSWD" ];
+        }
+        {
+          command = "/run/current-system/sw/bin/systemctl stop openvpn-adcolony.service";
+          options = [ "NOPASSWD" ];
+        }
+        {
+          command = "/run/current-system/sw/bin/systemctl restart openvpn-adcolony.service";
+          options = [ "NOPASSWD" ];
+        }
+      ];
+    }
   ];
 
   programs.browserpass.enable = true;
@@ -133,50 +153,11 @@ in
   };
   programs.ssh.startAgent = false;
   services.pcscd.enable = true;
-  services.gnupg.profiles = {
-    default = {
-      gpg-agent = ''
-        default-cache-ttl 10
-        max-cache-ttl 10
-        enable-ssh-support
-        default-cache-ttl-ssh 10
-        max-cache-ttl-ssh 10
-      '';
-
-      scdaemon = ''
-        reader-port "Yubico YubiKey OTP+FIDO+CCID"
-        card-timeout 60
-      '';
-    };
-
-    additional = {
-      internal-reader = {
-        scdaemon = ''
-          reader-port "Broadcom Corp 5880 [Contacted SmartCard] (0123456789ABCD)"
-          card-timeout 1
-        '';
-      };
-
-      mobile-reader = {
-        scdaemon = ''
-          reader-port "Gemalto USB Shell Token V2 (FF4C23A4)"
-          card-timeout 1
-        '';
-      };
-
-      pinpad-reader = {
-        scdaemon = ''
-          reader-port "Cherry GmbH SmartTerminal ST-2xxx [Vendor Interface] (21121451108871)"
-          card-timeout 1
-        '';
-      };
-    };
-  };
   systemd.services.gnupgshare = {
     partOf = [ "user@10000.service" ];
     wantedBy = [ "user@10000.service" ];
     
-    path = [ pkgs.bindfs pkgs.utillinux ];
+    path = with pkgs; [ bindfs utillinux ];
     preStart = "mkdir -p ${config.users.users.kjw.home}/.gnupg";
     serviceConfig = {
       Type = "oneshot";
@@ -195,6 +176,7 @@ in
     mountPoint = "%h/Shared/Keybase";
   };
 
+  boot.plymouth.enable = true;
   services.xserver = {
     enable = true;
     layout = "pl";
@@ -207,19 +189,12 @@ in
     };
 
     desktopManager.xterm.enable = false;
-    displayManager.lightdm.enable = true;
+    displayManager.sddm = {
+      enable = true;
+      enableHidpi = true;
+    };
     windowManager.i3 = {
       enable = true;
-      extraSessionCommands = ''
-         # Set GTK_PATH so that GTK+ can find the theme engines.
-         export GTK_PATH="${config.system.path}/lib/gtk-2.0:${config.system.path}/lib/gtk-3.0"
-
-         # Set GTK_DATA_PREFIX so that GTK+ can find the Xfce themes.
-         export GTK_DATA_PREFIX=${config.system.path}
-      
-         # SVG loader for pixbuf (needed for GTK svg icon themes)
-         export GDK_PIXBUF_MODULE_FILE=`echo ${pkgs.librsvg.out}/lib/gdk-pixbuf-2.0/*/loaders.cache` # */
-      '';
     };  
   };
   services.gnome3.glib-networking.enable = true;
@@ -237,6 +212,20 @@ in
     fi  
   '';
 
+  systemd.services.fava = {
+    partOf = [ "user@1000.service" ];
+    wantedBy = [ "user@1000.service" ];
+    
+    path = with pkgs; [ beancount fava ];
+    preStart = "mkdir -p ${config.users.users.kjw.home}/.gnupg";
+    serviceConfig = {
+      Type = "simple";
+      ExecStart = ''
+        ${pkgs.fava}/bin/fava ${config.users.users.kj.home}/Documents/Finances/2021/main.bean
+      '';
+    };
+  };
+
   environment.systemPackages = with pkgs; [
     acpi
     acpilight
@@ -247,6 +236,7 @@ in
     aspellDicts.de
     aspellDicts.en
     aspellDicts.pl
+    beancount
     bindfs
     blueman
     browserpass
@@ -258,6 +248,7 @@ in
     dmidecode
     dunst
     exiv2
+    fava
     feh
     firefox
     gimp-with-plugins
@@ -275,7 +266,7 @@ in
     libreoffice
     lightdm
     lm_sensors
-    mellowplayer
+    unstable.mellowplayer
     mpv
     mullvad-vpn
     ncmpcpp
@@ -290,10 +281,12 @@ in
     pdftk
     playerctl
     unstable.protonmail-bridge
+    razergenie
     redshift
     rofi
     rofi-pass
     samba
+    syncthing
     termite
     texlive.combined.scheme-full
     unrar
@@ -309,31 +302,35 @@ in
     zathura
   ];
 
+  virtualisation.oci-containers.backend = "docker";
+
   users.users.kj = {
-    passwordFile = "/var/lib/users/kj.password";
+    passwordFile = "/var/lib/secrets/kj.pw";
     uid = 1000;
     isNormalUser = true;
     home = "/home/kj";
-    description = "Krzysztof Janosz";
-    extraGroups = [ "networkmanager" "wheel" "video" ];
+    description = "Personal";
+    extraGroups = [ "networkmanager" "plugdev" "wheel" "video" ];
     packages = with pkgs; [ 
+      beancount
       cabextract 
+      discord
+      fava
       hledger 
       lutris
-      playonlinux 
-      (steam.override { extraPkgs = pkgs: [ libffi qt5.qtbase qt5.qttools qt5.qtsvg ]; })
+      unstable.steam
       thunderbird 
       wine 
     ];
   };
 
   users.users.kjw = {
-    passwordFile = "/var/lib/users/kjw.password";
+    passwordFile = "/var/lib/secrets/kjw.pw";
     uid = 10000;
     isNormalUser = true;
     home = "/home/kjw";
-    description = "Krzysztof Janosz (Work)";
-    extraGroups = [ "networkmanager" "video" ];
+    description = "Work";
+    extraGroups = [ "networkmanager" "plugdev" "video" ];
     packages = with pkgs; [ ];
   };
 }
