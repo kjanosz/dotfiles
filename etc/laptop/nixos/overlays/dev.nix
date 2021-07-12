@@ -12,9 +12,11 @@ foldlExtensions [
   (import (mozillaOverlays + "/rust-overlay.nix"))
   
   (self: super: rec {
-    ammonite2_12 = super.callPackage pkgs/ammonite { scala = "2.12"; };
+    ammonite_2_12 = super.callPackage pkgs/ammonite { scala = "2.12"; };
 
-    ammonite2_13 = super.callPackage pkgs/ammonite { scala = "2.13"; };
+    ammonite_2_13 = super.callPackage pkgs/ammonite { scala = "2.13"; };
+
+    ammonite_3_0 = super.callPackage pkgs/ammonite { scala = "3.0"; };
 
     mill = super.callPackage pkgs/mill { };
 
@@ -34,18 +36,18 @@ foldlExtensions [
     };
 
     rustChannels = {
-      stable = (super.rustChannelOf { date = "2020-12-31"; channel = "stable"; }).rust;
+      stable = (super.rustChannelOf { date = "2021-06-17"; channel = "stable"; }).rust;
 
-      beta = (super.rustChannelOf { date = "2021-01-06"; channel = "beta"; }).rust;
+      beta = (super.rustChannelOf { date = "2021-07-04"; channel = "beta"; }).rust;
 
-      nightly = (super.rustChannelOf { date = "2021-01-07"; channel = "nightly"; }).rust;
+      nightly = (super.rustChannelOf { date = "2021-07-11"; channel = "nightly"; }).rust;
     };
 
     scala = super.scala.override { jre = super.openjdk11; };
 
     sbt = super.sbt.override { jre = super.openjdk11; };
 
-    sbt_spark = super.sbt.override { jre = super.openjdk8; };
+    sbt8 = super.sbt.override { jre = super.openjdk8; };
 
     summon = super.unstable.summon;
 

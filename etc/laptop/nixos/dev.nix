@@ -28,7 +28,7 @@ in
     protobuf3_9
     summon
     # ide
-    unstable.idea.idea-community
+    unstable.jetbrains.idea-community
     vim
     vscode
     # haskell
@@ -54,19 +54,28 @@ in
     rustChannels.stable
     rustracer
     # scala & jvm
-    ammonite2_12
-    ammonite2_13
+    ammonite_2_12
+    ammonite_2_13
+    ammonite_3_0
     coursier
     dotty
-    mill
     openjdk11
+    mill
     sbt
     scala
     visualvm
   ];
 
-  environment.variables = {
-    EDITOR = mkOverride 900 "${pkgs.vim}/bin/vim";
+  environment = {
+    etc = {
+      "jdk8".source = pkgs.openjdk8;
+      "jdk11".source = pkgs.openjdk11;
+      "jdk16".source = pkgs.unstable.openjdk16;
+    };
+
+    variables = {
+      EDITOR = mkOverride 900 "${pkgs.vim}/bin/vim";
+    };
   };
 
   programs.adb.enable = true;
@@ -82,7 +91,7 @@ in
     host.enable = true;
     host.enableHardening = true;
     host.enableExtensionPack = true;
-    host.package = pkgs.unstable.virtualbox;
+    host.package = pkgs.virtualbox;
   };
 
   users.users.kj = {
@@ -96,12 +105,19 @@ in
   users.users.kjw = {
     extraGroups = [ "docker" "vboxusers" ];
     packages = with pkgs; [
+      adcolony.paas-nextgen
+      apacheKafka
       awscli
       aws-vault
+      cassandra
       jq
       kafkacat
       openvpn
       slack
+      unstable.kubernetes
+      unstable.kubernetes-helm
+      unstable.lens
+      vagrant
       wireshark
       zoom-us
     ];
@@ -129,7 +145,6 @@ in
     user = "1000:100";
     volumes = [
       "/home/kj/Dev:/tmp/dev"
-      "/home/kj/.local/share/jupyter:/.local/share/jupyter"
     ];
     workdir = "/tmp/dev";
   };

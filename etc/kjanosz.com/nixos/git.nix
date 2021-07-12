@@ -16,12 +16,12 @@ in
       forceSSL = true;
       useACMEHost = domain;
 
-      locations."/plantuml/" = {
-        proxyPass = "http://localhost:8080";
-      };
-
       locations."/" = {
         proxyPass = "http://localhost:3000";
+
+        extraConfig = ''
+          rewrite ^/.+/plantuml-images/([a-z0-9]*).svg$ /plantuml-images/$1.svg;
+        '';
       };
     };
 
@@ -52,6 +52,12 @@ in
       };
 
       settings = {
+        "markup.markdown" = {
+          ENABLED = true;                                                                                                         
+          FILE_EXTENSIONS = ".md,.markdown";                                                                                                       
+          RENDER_COMMAND = "pandoc -f markdown -t html --filter pandoc-plantuml";
+        };
+        
         cache = {
           ENABLED = true;
           ADAPTER = "redis";
@@ -71,17 +77,11 @@ in
       preStart = ''
         ${gitea}/bin/gitea migrate > /dev/null 2>&1
         ${gitea}/bin/gitea admin create-user --config /var/lib/gitea/custom/conf/app.ini --username kjanosz --email contact@kjanosz.com --admin --random-password --random-password-length 32 --must-change-password > /dev/null 2>&1 || true
+        mkdir -p /var/lib/gitea/custom/public && mkdir -p /var/lib/gitea/plantuml-images && ln -sf /var/lib/gitea/plantuml-images /var/lib/gitea/custom/public/.
       '';
 
+      path = [ pandoc pandoc-plantuml-filter plantuml ];
       serviceConfig.SystemCallFilter = mkForce "~@clock @cpu-emulation @debug @keyring @memlock @module @mount @obsolete @raw-io @reboot @resources @swap";
-    };
-
-    virtualisation.oci-containers.containers.plant-uml = {
-      autoStart = true;
-      image = "plantuml/plantuml-server:tomcat-v1.2020.22";
-      ports = [
-        "8080:8080"
-      ];
     };
   };
 }

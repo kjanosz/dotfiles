@@ -1,2 +1,4 @@
+xinput -set-prop "DualPoint Stick" "Device Enabled" 0
+
 xrandr --output eDP-1 --mode 2560x1440
 xrandr --output DP-2 --left-of eDP-1 --mode 3840x2160

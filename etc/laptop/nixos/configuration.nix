@@ -15,8 +15,12 @@ in
   networking = {
     hostName = "nixos";
     extraHosts = "127.0.0.1 ${config.networking.hostName}";
+    firewall.checkReversePath = "loose";
     nameservers = [ mullvadDNS ];
-    networkmanager.enable = true;
+    networkmanager = {
+      enable = true;
+      appendNameservers = [ mullvadDNS ];
+    };
     wireguard.enable = true;
   };
   services.mullvad-vpn.enable = true;
@@ -29,6 +33,7 @@ in
       };
     };
   };  
+  services.blueman.enable = true;
 
   hardware.pulseaudio = {
     enable = true;
@@ -119,6 +124,10 @@ in
       commands = [
         {
           command = "/run/current-system/sw/bin/systemctl start openvpn-adcolony.service";
+          options = [ "NOPASSWD" ];
+        }
+        {
+          command = "/run/current-system/sw/bin/systemctl status openvpn-adcolony.service";
           options = [ "NOPASSWD" ];
         }
         {
@@ -216,7 +225,7 @@ in
     partOf = [ "user@1000.service" ];
     wantedBy = [ "user@1000.service" ];
     
-    path = with pkgs; [ beancount fava ];
+    path = with pkgs; [ fava ];
     preStart = "mkdir -p ${config.users.users.kjw.home}/.gnupg";
     serviceConfig = {
       Type = "simple";
@@ -236,6 +245,7 @@ in
     aspellDicts.de
     aspellDicts.en
     aspellDicts.pl
+    bean-add
     beancount
     bindfs
     blueman
@@ -243,8 +253,8 @@ in
     cachix
     calibre
     chromium
-    desktop_utils.i3-lock-screen
-    desktop_utils.i3-merge-configs
+    desktop-utils.i3-lock-screen
+    desktop-utils.i3-merge-configs
     dmidecode
     dunst
     exiv2
@@ -276,6 +286,7 @@ in
     numix-gtk-theme
     numix-icon-theme
     numix-icon-theme-circle
+    ofono
     pandoc
     pavucontrol
     pdftk
@@ -304,6 +315,9 @@ in
 
   virtualisation.oci-containers.backend = "docker";
 
+  xdg.portal.enable = true;
+  services.flatpak.enable = true;
+
   users.users.kj = {
     passwordFile = "/var/lib/secrets/kj.pw";
     uid = 1000;
@@ -318,7 +332,7 @@ in
       fava
       hledger 
       lutris
-      unstable.steam
+      playonlinux
       thunderbird 
       wine 
     ];
