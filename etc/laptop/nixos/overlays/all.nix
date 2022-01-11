@@ -14,6 +14,16 @@ foldlExtensions [
   })
 
   (self: super: rec {
+    calibre = super.unstable.calibre.overrideAttrs (old: rec {
+      pname = "calibre";
+      version = "5.34.0";  
+
+      src = super.fetchurl {
+        url = "https://download.calibre-ebook.com/${version}/${pname}-${version}.tar.xz";
+        sha256 = "1qypjhl3z34ks8dr14y9vf2wgylzji3z4gsgvx8lhlywzbp03m6l";
+      };
+    });
+
     desktop-utils = super.callPackage ./pkgs/desktop-utils { };
 
     fava = super.fava.overrideAttrs (old: rec {
@@ -31,14 +41,19 @@ foldlExtensions [
       '';
     });
 
-    mullvad-vpn = super.unstable.mullvad-vpn.overrideAttrs (old: rec {
-      name = "mullvad-vpn-${version}";
-      version = "2021.4";
-      src = super.pkgs.fetchurl {
-        url = "https://www.mullvad.net/media/app/MullvadVPN-${version}_amd64.deb";
-        sha256 = "0kdbvjajmp0d3m65pc6cdb9fgk2jzdk1x60hxnjpv77sl3iccw96";
+    libmtp = super.libmtp.overrideAttrs (old: rec {
+      pname = "libmtp";
+      version = "1.1.19";
+
+      src = super.pkgs.fetchFromGitHub {
+        owner = pname;
+        repo = pname;
+        rev = "${pname}-${builtins.replaceStrings [ "." ] [ "-" ] version}";
+        sha256 = "0fy99cn4r0cmwggp8rnzgsvmfnghbad2irrh3pklz9adlnh4mhm3";
       };
     });
+
+    mullvad-vpn = super.unstable.mullvad-vpn;
 
     python3 = super.python3.override {
       packageOverrides = python-self: python-super: {
@@ -48,9 +63,7 @@ foldlExtensions [
       };
     };
 
-    steam = super.unstable.steam.override { 
-      extraPkgs = pkgs: with pkgs; [ libffi qt5.qtbase qt5.qttools qt5.qtsvg ]; 
-    };
+    mzd-aio = super.callPackage ./pkgs/mzd-aio { };
   })
 
   (self: super: foldlExtensions [

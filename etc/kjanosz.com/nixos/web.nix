@@ -14,7 +14,7 @@ in
       user = "nginx";
       group = "nginx";
 
-      package = stdenv.lib.overrideDerivation nginx (oldAttrs: {
+      package = lib.overrideDerivation nginx (oldAttrs: {
         postInstall = ''
           ${openssl.bin}/bin/openssl dhparam -out "$out/dhparam.pem" 4096
         '';

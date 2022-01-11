@@ -24,10 +24,13 @@ in
     wireguard.enable = true;
   };
   services.mullvad-vpn.enable = true;
+  services.resolved = {
+    enable = true;
+  };
 
   hardware.bluetooth = {
     enable = true;
-    config = {
+    settings = {
       General = {
         Enable = "Source,Sink,Media,Socket";
       };
@@ -35,14 +38,12 @@ in
   };  
   services.blueman.enable = true;
 
-  hardware.pulseaudio = {
+  security.rtkit.enable = true;
+  services.pipewire = {
     enable = true;
-    package = pkgs.pulseaudioFull;
-    support32Bit = true;
-    tcp = {
-      enable = true;
-      anonymousClients.allowedIpRanges = [ "127.0.0.1" ];
-    };
+    alsa.enable = true;
+    alsa.support32Bit = true;
+    pulse.enable = true;
   };
 
   hardware.opengl = {
@@ -114,6 +115,10 @@ in
           options = [ "NOPASSWD" ];
         }
         {
+          command = "/run/current-system/sw/bin/nix-channel";
+          options = [ "NOPASSWD" ];
+        }
+        {
           command = "/run/current-system/sw/bin/nix-collect-garbage";
           options = [ "NOPASSWD" ];
         }
@@ -122,6 +127,10 @@ in
     {
       users = [ "kjw" ];
       commands = [
+        {
+          command = "/run/current-system/sw/bin/bash";
+          options = [ "NOPASSWD" ];
+        }
         {
           command = "/run/current-system/sw/bin/systemctl start openvpn-adcolony.service";
           options = [ "NOPASSWD" ];
@@ -147,6 +156,7 @@ in
   services.upower.enable = true;
 
   services.udev.packages = with pkgs; [ 
+    libmtp
     libu2f-host
     yubikey-personalization 
   ];
@@ -206,7 +216,7 @@ in
       enable = true;
     };  
   };
-  services.gnome3.glib-networking.enable = true;
+  services.gnome.glib-networking.enable = true;
 
   environment.extraInit = let
     cp = "cp --no-preserve=mode --remove-destination --symbolic-link --recursive";
@@ -226,11 +236,10 @@ in
     wantedBy = [ "user@1000.service" ];
     
     path = with pkgs; [ fava ];
-    preStart = "mkdir -p ${config.users.users.kjw.home}/.gnupg";
     serviceConfig = {
       Type = "simple";
       ExecStart = ''
-        ${pkgs.fava}/bin/fava ${config.users.users.kj.home}/Documents/Finances/2021/main.bean
+        ${pkgs.fava}/bin/fava ${config.users.users.kj.home}/Documents/Finances/2022/main.bean
       '';
     };
   };
@@ -272,6 +281,7 @@ in
     imgurbash2
     inkscape
     keybase-gui
+    libmtp
     libnotify
     libreoffice
     lightdm
@@ -279,6 +289,7 @@ in
     unstable.mellowplayer
     mpv
     mullvad-vpn
+    mzd-aio
     ncmpcpp
     networkmanagerapplet
     nix-prefetch-github
@@ -287,6 +298,8 @@ in
     numix-icon-theme
     numix-icon-theme-circle
     ofono
+    unstable.open-fonts
+    pamixer
     pandoc
     pavucontrol
     pdftk
@@ -326,12 +339,8 @@ in
     description = "Personal";
     extraGroups = [ "networkmanager" "plugdev" "wheel" "video" ];
     packages = with pkgs; [ 
-      beancount
       cabextract 
       discord
-      fava
-      hledger 
-      lutris
       playonlinux
       thunderbird 
       wine 

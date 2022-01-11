@@ -14,19 +14,21 @@ in
     # general
     ack
     ag
-    arion
     dbeaver
     docker_compose
-    unstable.flyway
+    flyway
     gcc
     gdb
     gnumake
     insomnia
+    jq
     nbstripout
-    unstable.packer
+    packer
     pre-commit
     protobuf3_9
     summon
+    vagrant
+    wireshark
     # ide
     unstable.jetbrains.idea-community
     vim
@@ -35,42 +37,55 @@ in
     cabal2nix
     cabal-install
     ghc
-    # unstable.haskellPackages.apply-refact
-    # unstable.haskellPackages.brittany
-    # unstable.haskellPackages.HaRe
-    # idris
-    idris
+    haskellPackages.apply-refact
+    haskellPackages.brittany
+    haskellPackages.hlint
     # lisp
     racket
     # proof
     coq
-    tla
-    # purescript
-    unstable.purescript
+    tlaps
     # rust
-    carnix
+    cargo
+    cargo-asm
+    cargo-audit
+    cargo-c
+    cargo-cross
+    cargo-depgraph
     cargo-expand
+    cargo-flash
+    cargo-msrv
+    cargo-outdated
+    cargo-rr
     llvmPackages.bintools
     rustChannels.stable
-    rustracer
+    rustup
     # scala & jvm
-    ammonite_2_12
     ammonite_2_13
     ammonite_3_0
     coursier
     dotty
-    openjdk11
+    eclipse-mat
+    kotlin
+    kotlin-native
+    ktlint
+    openjdk17
     mill
     sbt
     scala
+    scalafmt
+    scalafix
     visualvm
+    # other
+    flutter
+    go_1_17
   ];
 
   environment = {
     etc = {
       "jdk8".source = pkgs.openjdk8;
       "jdk11".source = pkgs.openjdk11;
-      "jdk16".source = pkgs.unstable.openjdk16;
+      "jdk17".source = pkgs.openjdk17;
     };
 
     variables = {
@@ -98,7 +113,6 @@ in
     extraGroups = [ "adbusers" "docker" "kvm" "libvirtd" "vboxusers" ];
     packages = with pkgs; [
       python3Packages.arelle-headless 
-      wireshark
     ];
   };  
 
@@ -110,23 +124,13 @@ in
       awscli
       aws-vault
       cassandra
-      jq
       kafkacat
-      openvpn
       slack
       unstable.kubernetes
       unstable.kubernetes-helm
       unstable.lens
-      vagrant
-      wireshark
       zoom-us
     ];
-  };
-
-  services.openvpn.servers.adcolony = {
-    autoStart = false;
-    config = "config /var/lib/openvpn/adcolony.ovpn";
-    updateResolvConf = true;
   };
 
   virtualisation.oci-containers.containers.data-science = {

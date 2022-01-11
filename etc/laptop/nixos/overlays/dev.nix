@@ -18,8 +18,6 @@ foldlExtensions [
 
     ammonite_3_0 = super.callPackage pkgs/ammonite { scala = "3.0"; };
 
-    mill = super.callPackage pkgs/mill { };
-
     nbstripout = with super.python3Packages; buildPythonApplication rec {
       name = "${pname}-${version}";
       pname = "nbstripout";
@@ -36,11 +34,11 @@ foldlExtensions [
     };
 
     rustChannels = {
-      stable = (super.rustChannelOf { date = "2021-06-17"; channel = "stable"; }).rust;
+      stable = (super.rustChannelOf { date = "2021-12-02"; channel = "stable"; }).rust;
 
-      beta = (super.rustChannelOf { date = "2021-07-04"; channel = "beta"; }).rust;
+      beta = (super.rustChannelOf { date = "2021-12-06"; channel = "beta"; }).rust;
 
-      nightly = (super.rustChannelOf { date = "2021-07-11"; channel = "nightly"; }).rust;
+      nightly = (super.rustChannelOf { date = "2021-12-27"; channel = "nightly"; }).rust;
     };
 
     scala = super.scala.override { jre = super.openjdk11; };
